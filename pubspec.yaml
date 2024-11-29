@@ -1,0 +1,56 @@
+name: namer_app
+description: A new Flutter project.
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.32.11
+
+environment:
+  sdk: '>=2.19.4 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  english_words: ^4.0.0
+  provider: ^6.1.2
+
+  flutter_blue_plus: ^1.32.4
+  fl_chart: ^0.69.0
+  intl: 0.17.0
+
+  network_info_plus: ^5.0.3
+  flutter_bluetooth_serial: ^0.4.0
+  permission_handler: ^11.3.1
+  scoped_model: ^2.0.0
+  shared_preferences: ^2.3.2
+  sqflite: ^2.3.3+1
+  path: ^1.9.0
+  fluttertoast: ^8.2.8
+
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/background.jpg
+    - assets/images/chair.png
+    - assets/images/cat.png
+    - assets/images/sit1.png
+    - assets/images/sit2.png
+    - assets/images/add.png
+    - assets/images/idol.png
+    - assets/images/P1.png
+  fonts:
+  - family: Rainbow
+    fonts:
+      - asset: fonts/Rainbow-Party-2.ttf
+        style: italic
+
+
