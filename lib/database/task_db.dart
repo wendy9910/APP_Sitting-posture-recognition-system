@@ -162,4 +162,25 @@ class TaskDB {
           whereArgs: [taskId, postureType]);
     }
   }
+
+  // 刪除指定 task_id 的任務及相關姿勢統計數據
+  Future<void> deleteTask(int taskId) async {
+    final db = await database;
+
+    // 先刪除 PostureStats 表中與該 task_id 相關的數據
+    await db.delete(
+      'PostureStats',
+      where: 'task_id = ?',
+      whereArgs: [taskId],
+    );
+
+    // 再刪除 Tasks 表中指定的任務
+    await db.delete(
+      'Tasks',
+      where: 'task_id = ?',
+      whereArgs: [taskId],
+    );
+
+    print("Deleted task with ID: $taskId and related PostureStats.");
+  }
 }

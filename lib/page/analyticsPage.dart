@@ -87,6 +87,42 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     }
   }
 
+  Future<void> _deleteTask() async {
+    if (selectedTask == null) return;
+
+    // 顯示確認對話框
+    bool confirm = await _showConfirmDialog();
+    if (confirm) {
+      await TaskDB.instance.deleteTask(selectedTask.taskId); // 刪除任務
+      await loadTasks(); // 重新加載任務
+    }
+  }
+
+  // 顯示確認對話框
+  Future<bool> _showConfirmDialog() async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("Deletion Confirmation"),
+              content: Text(
+                  "Are you sure you want to delete this task? This action cannot be undone."),
+              actions: [
+                TextButton(
+                  child: Text("Cancel"),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+                TextButton(
+                  child: Text("Confirm"),
+                  onPressed: () => Navigator.of(context).pop(true),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false; // 防止 null 返回
+  }
+
   // 根據選擇的任務ID加載坐姿數據
   Future<void> loadPostureData() async {
     // 使用選擇的任務ID從數據庫中獲取坐姿統計數據
@@ -197,6 +233,17 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                   ),
                   _buildLegend(),
                   SizedBox(height: 40),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        tooltip: "刪除此任務",
+                        onPressed: _deleteTask,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10),
                 ],
               ),
       ),
