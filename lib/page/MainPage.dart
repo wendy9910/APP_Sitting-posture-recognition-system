@@ -1,18 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart'; // 狀態管理套件
-import 'bluetoothcontrol.dart';
 import 'analyticsPage.dart';
 import 'StartPage.dart';
 import 'SettingPage.dart';
 import 'CalibrationPage.dart';
-import 'dart:ui';
 
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-
-import '../bluetoothPage/BackgroundCollectingTask.dart';
-import '../bluetoothPage/DiscoveryPage.dart';
 import '../bluetoothPage/SelectBondedDevicePage.dart';
 import '../bluetoothPage/BluetoothConnectionProvider.dart';
 
@@ -42,7 +36,6 @@ class _MainPage extends State<MainPage> {
   }
 }
 
-// MyAppState是一個用於存儲應用狀態的類
 class MyAppState extends ChangeNotifier {
   // 初始化一些狀態變量
   var selectedIndex = 0; // ...其他狀態變量
@@ -53,81 +46,122 @@ class MyAppState extends ChangeNotifier {
   }
 }
 
-// MyHomePage是有狀態的widget，會創建一個狀態對象 _MyHomePageState
 class MyHomePage extends StatefulWidget {
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  // Navigator 的鍵
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+
+  @override
+  void initState() {
+    super.initState();
+    // 在導航初始化時推入首頁
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _navigatorKey.currentState!.push(
+        MaterialPageRoute(builder: (_) => GeneratorPage()),
+      );
+    });
+  }
+
   // 切換頁面的函數
   void _onItemTapped(int index) {
     setState(() {
       context.read<MyAppState>().setSelectedIndex(index);
     });
+
+    // 根據索引切換導航頁面
+    _navigatorKey.currentState!.push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return _buildPage(index);
+        },
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+      ),
+    );
+  }
+
+  // 根據索引構建對應的頁面
+  Widget _buildPage(int index) {
+    final List<Widget> pages = [
+      GeneratorPage(),
+      StartPage(),
+      AnalyticsPage(),
+      SettingPage()
+    ];
+    return pages[index];
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Consumer<MyAppState>(
-        builder: (context, appState, child) {
-          final List<Widget> pages = [
-            GeneratorPage(),
-            StartPage(),
-            AnalyticsPage(),
-            SettingPage()
-          ];
-          return pages[appState.selectedIndex];
-        },
-      ),
-      bottomNavigationBar: Consumer<MyAppState>(
-        builder: (context, appState, child) {
-          return Column(
-            mainAxisSize: MainAxisSize.min, // 選單區域緊湊排列
-            children: [
-              // 分隔線
-              Container(
-                height: 1,
-                color: const Color.fromARGB(255, 220, 220, 220), // 分隔線顏色
-              ),
-              // 底部導航欄
-              BottomNavigationBar(
-                type: BottomNavigationBarType.fixed,
-                backgroundColor:
-                    const Color.fromARGB(255, 240, 240, 240), // 調整背景顏色為淺灰色
-                selectedItemColor:
-                    const Color.fromARGB(255, 0, 86, 179), // 調整選中項目顏色為深藍色
-                unselectedItemColor:
-                    const Color.fromARGB(255, 130, 130, 130), // 調整未選中項目顏色為中灰色
-                selectedFontSize: 14, // 選中項目文字大小
-                unselectedFontSize: 12, // 未選中項目文字大小
-                elevation: 8, // 提升選單陰影效果
-                items: const <BottomNavigationBarItem>[
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.home),
-                    label: 'Home',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.slideshow_rounded),
-                    label: 'Start',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.analytics),
-                    label: 'Analytics',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.settings_rounded),
-                    label: 'Settings',
-                  ),
-                ],
-                currentIndex: appState.selectedIndex,
-                // selectedItemColor: Theme.of(context).colorScheme.secondary,
-                onTap: _onItemTapped,
-              ),
-            ],
-          );
-        },
+    return WillPopScope(
+      onWillPop: () async {
+        // 檢查 Navigator 的返回堆疊
+        if (_navigatorKey.currentState!.canPop()) {
+          _navigatorKey.currentState!.pop(); // 返回到上一页
+          return false; // 攔截返回键
+        }
+        return true; // 允許退出應用
+      },
+      child: Scaffold(
+        body: Navigator(
+          key: _navigatorKey,
+          onGenerateRoute: (RouteSettings settings) {
+            final appState = context.read<MyAppState>();
+            return MaterialPageRoute(
+              builder: (context) => _buildPage(appState.selectedIndex),
+            );
+          },
+        ),
+        bottomNavigationBar: Consumer<MyAppState>(
+          builder: (context, appState, child) {
+            return Column(
+              mainAxisSize: MainAxisSize.min, // 緊湊排列導航欄
+              children: [
+                Container(
+                  height: 1,
+                  color: const Color.fromARGB(255, 220, 220, 220), // 分隔線顏色
+                ),
+                BottomNavigationBar(
+                  type: BottomNavigationBarType.fixed,
+                  backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                  selectedItemColor: const Color.fromARGB(255, 0, 86, 179),
+                  unselectedItemColor: const Color.fromARGB(255, 130, 130, 130),
+                  selectedFontSize: 14,
+                  unselectedFontSize: 12,
+                  elevation: 8,
+                  currentIndex: appState.selectedIndex,
+                  onTap: _onItemTapped,
+                  items: const <BottomNavigationBarItem>[
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.home),
+                      label: 'Home',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.slideshow_rounded),
+                      label: 'Start',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.analytics),
+                      label: 'Analytics',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.settings_rounded),
+                      label: 'Settings',
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -308,38 +342,3 @@ class BigCard extends StatelessWidget {
     );
   }
 }
-
-// class BigCard extends StatelessWidget {
-//   const BigCard({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Column(
-//       mainAxisAlignment: MainAxisAlignment.center, // 居中對齊
-//       children: <Widget>[
-//         Text(
-//           'Sit smart, Stay healthy',
-//           textAlign: TextAlign.center,
-//           style: TextStyle(
-//             fontSize: 28,
-//             fontWeight: FontWeight.bold,
-//             fontFamily: 'DengXian',
-//             color: Color.fromARGB(255, 30, 30, 30), // 深色文字
-//           ),
-//         ),
-//         SizedBox(height: 200),
-//         Text(
-//           'Hi ! Welcome back...',
-//           textAlign: TextAlign.center,
-//           style: TextStyle(
-//             fontSize: 24,
-//             fontWeight: FontWeight.bold,
-//             fontFamily: 'DengXian',
-//             color: Color.fromARGB(255, 108, 117, 125), // 深色文字
-//           ),
-//         ),
-//         SizedBox(height: 50),
-//       ],
-//     );
-//   }
-// }
