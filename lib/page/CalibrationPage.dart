@@ -3,38 +3,159 @@ import 'package:provider/provider.dart'; // 狀態管理套件
 import '../bluetoothPage/BluetoothConnectionProvider.dart';
 
 class CalibrationPage extends StatelessWidget {
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 237, 244, 245),
       appBar: AppBar(
         title: Text('Calibration Page'),
       ),
-      body: Center(
+      body: Container(
+        // 添加背景圖片和漸變色
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/BG3.jpg'), // 背景圖片
+            fit: BoxFit.cover, // 覆蓋整個容器
+          ),
+          gradient: LinearGradient(
+            colors: [
+              Color.fromARGB(120, 240, 240, 240), // 淺灰色
+              Color.fromARGB(180, 116, 116, 116), // 深灰色
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            ElevatedButton(
-              onPressed: () {
-                // 當按下 "upper sensor" 按鈕時，跳轉到 UpperCalibrationPage
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => UpperCalibrationPage()),
-                );
-              },
-              child: Text('Upper Sensor Calibration'),
+          children: [
+            // 上半部區塊：坐姿引導
+            const SizedBox(height: 40.0),
+            const Text(
+              "Confirm sitting posture",
+              style: TextStyle(
+                fontSize: 28.0,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'DengXian',
+                color: Color.fromARGB(255, 30, 30, 30), // 深色文字
+              ),
             ),
-            SizedBox(height: 20), // 增加一些空白區域
-            ElevatedButton(
-              onPressed: () {
-                // 當按下 "lower sensor" 按鈕時，跳轉到 LowerCalibrationPage
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => LowerCalibrationPage()),
-                );
-              },
-              child: Text('Lower Sensor Calibration'),
+            const SizedBox(height: 20.0),
+            Expanded(
+              flex: 4, // 上方佔 4 比例空間
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 18.0, vertical: 30.0),
+                child: Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(54, 199, 199, 199)
+                        .withOpacity(0.8), // 背景顏色 + 透明度
+                    borderRadius: BorderRadius.circular(18.0), // 圓角
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start, // 靠左對齊
+                    children: const [
+                      Text(
+                        "• Sit with your back straight and shoulders relaxed naturally.",
+                        style: TextStyle(
+                          fontSize: 18, // 文字大小
+                          fontWeight: FontWeight.w600, // 字體加粗
+                          color: Color.fromARGB(255, 50, 50, 50), // 文字顏色
+                        ),
+                      ),
+                      SizedBox(height: 8.0), // 行間距
+                      Text(
+                        "• Keep your neck and head upright, aligning your ears with your shoulders.",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Color.fromARGB(255, 50, 50, 50),
+                        ),
+                      ),
+                      SizedBox(height: 8.0),
+                      Text(
+                        "• Bend your knees at approximately a 90-degree angle.",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Color.fromARGB(255, 50, 50, 50),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // 下半部區塊：裝置校正按鈕
+            Expanded(
+              flex: 3, // 下方佔 3 比例空間
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center, // 中心對齊
+                children: [
+                  const SizedBox(height: 20.0),
+                  const Text(
+                    "Confirm device location",
+                    style: TextStyle(
+                      fontSize: 28.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 20.0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => UpperCalibrationPage()),
+                        );
+                      },
+                      child: const Text("Upper Sensor Calibration"),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(200, 50), // 設置按鈕尺寸
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 12), // 調整內邊距
+                        backgroundColor:
+                            const Color.fromARGB(255, 36, 64, 114), // 背景顏色
+                        foregroundColor: Colors.white, // 文字顏色
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.zero, // 設置直角樣式
+                        ),
+                        elevation: 4, // 增加輕微陰影，提升層次感
+                        shadowColor: Colors.black.withOpacity(0.2), // 陰影顏色
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 30.0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => LowerCalibrationPage()),
+                        );
+                      },
+                      child: const Text("Lower Sensor Calibration"),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(200, 50), // 設置按鈕尺寸
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 16), // 調整內邊距
+                        backgroundColor:
+                            const Color.fromARGB(255, 36, 64, 114), // 背景顏色
+                        foregroundColor: Colors.white, // 文字顏色
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.zero, // 設置直角樣式
+                        ),
+                        elevation: 4, // 增加輕微陰影，提升層次感
+                        shadowColor: Colors.black.withOpacity(0.2), // 陰影顏色
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -59,13 +180,11 @@ class _UpperCalibrationPageState extends State<UpperCalibrationPage> {
     if (!isCalibrating) {
       bluetoothProvider.sendMessage("2"); // Start calibration
       bluetoothProvider.setDataType("2");
-      isCalibrating =
-          true; // Update state to reflect that calibration has started
+      isCalibrating = true;
     } else {
       bluetoothProvider.sendMessage("3"); // Stop calibration
       bluetoothProvider.setDataType("3");
-      isCalibrating =
-          false; // Update state to reflect that calibration has stopped
+      isCalibrating = false;
     }
 
     setState(() {}); // Trigger a rebuild to update the UI
@@ -73,45 +192,44 @@ class _UpperCalibrationPageState extends State<UpperCalibrationPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Code to retrieve data and handle the display remains the same...
-
+    //get value from BluetoothConnectionProvider.dart
     final bluetoothProvider = Provider.of<BluetoothConnectionProvider>(context);
-    String X1_str = bluetoothProvider.getX1(); // 取得 x1 (String)
-    String Y1_str = bluetoothProvider.getY1(); // 取得 y1 (String)
-    String X2_str = bluetoothProvider.getX2(); // 取得 x2 (String)
-    String Y2_str = bluetoothProvider.getY2(); // 取得 y2 (String)
+    String X1_str = bluetoothProvider.getX1();
+    String Y1_str = bluetoothProvider.getY1();
+    String X2_str = bluetoothProvider.getX2();
+    String Y2_str = bluetoothProvider.getY2();
 
+    // 將 String 轉換為 int
+    int x1 = int.tryParse(X1_str) ?? 0;
+    int y1 = int.tryParse(Y1_str) ?? 0;
+    int x2 = int.tryParse(X2_str) ?? 0;
+    int y2 = int.tryParse(Y2_str) ?? 0;
+    y2 = y1 + (x2 - x1); //調成等比正方形
+
+    Rectangle rectA = Rectangle(230, 70, 400, 250);
+    Rectangle rectB = Rectangle(x1, y1, x2, y2);
+
+    // 計算重疊率
+    double result = calculateIoU(rectA, rectB);
+
+    print('重合率: $result');
+
+    if (result > 0.7) {
+      print("Correct!!");
+      isCalibrating = true;
+      isCalibrating0 = true;
+      bluetoothProvider.sendMessage("3");
+      bluetoothProvider.setDataType("3");
+    }
+
+    //畫面用途
     // 將 String 轉換為 double
     double X1 = double.tryParse(X1_str) ?? 0; // 如果轉換失敗，預設為 0
     double Y1 = double.tryParse(Y1_str) ?? 0;
     double X2 = double.tryParse(X2_str) ?? 0;
     double Y2 = double.tryParse(Y2_str) ?? 0;
 
-    int x1 = int.tryParse(X1_str) ?? 0; // 如果轉換失敗，預設為 0
-    int y1 = int.tryParse(Y1_str) ?? 0;
-    int x2 = int.tryParse(X2_str) ?? 0;
-    int y2 = int.tryParse(Y2_str) ?? 0;
-
-    Rectangle rectA = Rectangle(230, 70, 400, 250);
-    Rectangle rectB = Rectangle(x1, y1, x2, y2);
-
-    // 計算重疊率
-    var result = calculateOverlapRatio(rectA, rectB);
-    double overlapRatio = result['overlapRatio']!;
-    double coverageRatio = result['coverageRatio']!;
-
-    print('重疊率: $overlapRatio');
-    print('覆蓋率: $coverageRatio');
-
-    if (overlapRatio > 0.85 && coverageRatio > 0.85) {
-      if (210 < x1 && y1 > 60 && x2 < 420) {
-        print("Correct!!");
-        isCalibrating = true;
-        isCalibrating0 = true;
-        bluetoothProvider.sendMessage("3");
-        bluetoothProvider.setDataType("3");
-      }
-    }
+    Y2 = Y1 + (X2 - X1); //調成等比正方形
 
     double W = (X2 - X1) / 2; // 計算寬度
     double H = (Y2 - Y1) / 2; // 計算高度
@@ -120,7 +238,7 @@ class _UpperCalibrationPageState extends State<UpperCalibrationPage> {
     double Y = Y1 / 2;
 
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 237, 244, 245),
+      backgroundColor: Color.fromARGB(255, 250, 255, 255),
       appBar: AppBar(
         title: Text('Sensor Calibration'),
       ),
@@ -130,7 +248,12 @@ class _UpperCalibrationPageState extends State<UpperCalibrationPage> {
           children: <Widget>[
             Text(
               'Calibrating......',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'DengXian',
+                color: Color.fromARGB(255, 15, 49, 99),
+              ),
             ),
             SizedBox(height: 20),
             isCalibrating0
@@ -190,7 +313,7 @@ class _UpperCalibrationPageState extends State<UpperCalibrationPage> {
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
-                backgroundColor: Colors.blue, // Button color
+                backgroundColor: const Color.fromARGB(255, 36, 64, 114), // 背景顏色
                 foregroundColor: Colors.white, // Text color
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
@@ -220,23 +343,18 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
     if (!isCalibrating) {
       bluetoothProvider.sendMessage("4"); // Start calibration
       bluetoothProvider.setDataType("4");
-      isCalibrating =
-          true; // Update state to reflect that calibration has started
+      isCalibrating = true;
     } else {
       bluetoothProvider.sendMessage("5"); // Stop calibration
       bluetoothProvider.setDataType("5");
-      isCalibrating =
-          false; // Update state to reflect that calibration has stopped
+      isCalibrating = false;
     }
-
-    setState(() {}); // Trigger a rebuild to update the UI
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     final bluetoothProvider = Provider.of<BluetoothConnectionProvider>(context);
-
-    bool isCalibrating = false;
 
     String X1_str = bluetoothProvider.getX1(); // 取得 x1 (String)
     String Y1_str = bluetoothProvider.getY1(); // 取得 y1 (String)
@@ -244,11 +362,6 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
     String Y2_str = bluetoothProvider.getY2(); // 取得 y2 (String)
 
     // 將 String 轉換為 int
-    double X1 = double.tryParse(X1_str) ?? 0; // 如果轉換失敗，預設為 0
-    double Y1 = double.tryParse(Y1_str) ?? 0;
-    double X2 = double.tryParse(X2_str) ?? 0;
-    double Y2 = double.tryParse(Y2_str) ?? 0;
-
     int x1 = int.tryParse(X1_str) ?? 0; // 如果轉換失敗，預設為 0
     int y1 = int.tryParse(Y1_str) ?? 0;
     int x2 = int.tryParse(X2_str) ?? 0;
@@ -257,23 +370,24 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
     Rectangle rectA = Rectangle(280, 160, 640, 480);
     Rectangle rectB = Rectangle(x1, y1, x2, y2);
 
-    // 計算重疊率
-    var result = calculateOverlapRatio(rectA, rectB);
-    double overlapRatio = result['overlapRatio']!;
-    double coverageRatio = result['coverageRatio']!;
+    // 計算重合率
+    double result = calculateIoU(rectA, rectB);
+    print('重合率: $result');
 
-    print('重疊率: $overlapRatio');
-    print('覆蓋率: $coverageRatio');
-
-    if (overlapRatio > 0.85 && coverageRatio > 0.85) {
-      if (270 < x1 && y1 > 150) {
-        print("Correct!!");
-        isCalibrating = true;
-        isCalibrating0 = true;
-        bluetoothProvider.sendMessage("5");
-        bluetoothProvider.setDataType("5");
-      }
+    if (result > 0.7) {
+      print("Correct!!");
+      isCalibrating = true;
+      isCalibrating0 = true;
+      bluetoothProvider.sendMessage("5");
+      bluetoothProvider.setDataType("5");
     }
+
+    //畫出畫面
+    // 將 String 轉換為 double
+    double X1 = double.tryParse(X1_str) ?? 0; // 如果轉換失敗，預設為 0
+    double Y1 = double.tryParse(Y1_str) ?? 0;
+    double X2 = double.tryParse(X2_str) ?? 0;
+    double Y2 = double.tryParse(Y2_str) ?? 0;
 
     double W = (X2 - X1) / 2; // 計算寬度
     double H = (Y2 - Y1) / 2; // 計算高度
@@ -282,7 +396,7 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
     double Y = Y1 / 2;
 
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 237, 244, 245),
+      backgroundColor: Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
         title: Text('Sensor Calibration'),
       ),
@@ -292,7 +406,12 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
           children: <Widget>[
             Text(
               'Calibrating......',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'DengXian',
+                color: Color.fromARGB(255, 15, 49, 99),
+              ),
             ),
             SizedBox(height: 20),
             isCalibrating0
@@ -352,7 +471,8 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
-                backgroundColor: Colors.blue, // Button color
+                backgroundColor:
+                    Color.fromARGB(255, 15, 49, 99), // Button color
                 foregroundColor: Colors.white, // Text color
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
@@ -369,81 +489,32 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
 // 定義一個類來存儲矩形的坐標
 class Rectangle {
   int x1, y1, x2, y2;
-
   Rectangle(this.x1, this.y1, this.x2, this.y2);
 }
 
-Map<String, double> calculateOverlapRatio(Rectangle rectA, Rectangle rectB) {
-  // 計算重疊的左上角坐標
-  int overlapX1 = (rectA.x1 > rectB.x1) ? rectA.x1 : rectB.x1;
-  int overlapY1 = (rectA.y1 > rectB.y1) ? rectA.y1 : rectB.y1;
+double calculateIoU(Rectangle rectA, Rectangle rectB) {
+  // 計算交集的左上角與右下角
+  int xInter1 = rectA.x1 > rectB.x1 ? rectA.x1 : rectB.x1;
+  int yInter1 = rectA.y1 > rectB.y1 ? rectA.y1 : rectB.y1;
+  int xInter2 = rectA.x2 < rectB.x2 ? rectA.x2 : rectB.x2;
+  int yInter2 = rectA.y2 < rectB.y2 ? rectA.y2 : rectB.y2;
 
-  // 計算重疊的右下角坐標
-  int overlapX2 = (rectA.x2 < rectB.x2) ? rectA.x2 : rectB.x2;
-  int overlapY2 = (rectA.y2 < rectB.y2) ? rectA.y2 : rectB.y2;
+  // 計算交集的寬度與高度
+  int interWidth = (xInter2 > xInter1) ? (xInter2 - xInter1) : 0;
+  int interHeight = (yInter2 > yInter1) ? (yInter2 - yInter1) : 0;
 
-  // 計算重疊區域的寬度和高度
-  int width = overlapX2 - overlapX1;
-  int height = overlapY2 - overlapY1;
+  // 計算交集的面積
+  int intersectionArea = interWidth * interHeight;
 
-  // 如果有重疊，計算重疊面積
-  int overlapArea = 0;
-  if (width > 0 && height > 0) {
-    overlapArea = width * height;
-  }
-
-  // 計算方形 A 和方形 B 的面積
+  // 計算兩個矩形的面積
   int areaA = (rectA.x2 - rectA.x1) * (rectA.y2 - rectA.y1);
   int areaB = (rectB.x2 - rectB.x1) * (rectB.y2 - rectB.y1);
 
-  // 計算重疊率
-  double overlapRatio = 0;
-  if (overlapArea > 0) {
-    int minArea = (areaA < areaB) ? areaA : areaB;
-    overlapRatio = overlapArea / minArea;
-  }
+  // 計算聯集的面積
+  int unionArea = areaA + areaB - intersectionArea;
 
-  // 計算覆蓋率（矩形 B 的重疊區域佔矩形 A 的比例）
-  double coverageRatio = 0;
-  if (areaA > 0 && overlapArea > 0) {
-    coverageRatio = overlapArea / areaA;
-  }
+  // 計算 IOU
+  double iou = unionArea != 0 ? intersectionArea / unionArea : 0;
 
-  // 返回 overlapRatio、areaB 和 coverageRatio
-  return {'overlapRatio': overlapRatio, 'coverageRatio': coverageRatio};
+  return iou;
 }
-
-
-// 計算兩個矩形的重疊率
-// double calculateOverlapRatio(Rectangle rectA, Rectangle rectB) {
-//   // 計算重疊的左上角坐標
-//   int overlapX1 = (rectA.x1 > rectB.x1) ? rectA.x1 : rectB.x1;
-//   int overlapY1 = (rectA.y1 > rectB.y1) ? rectA.y1 : rectB.y1;
-
-//   // 計算重疊的右下角坐標
-//   int overlapX2 = (rectA.x2 < rectB.x2) ? rectA.x2 : rectB.x2;
-//   int overlapY2 = (rectA.y2 < rectB.y2) ? rectA.y2 : rectB.y2;
-
-//   // 計算重疊區域的寬度和高度
-//   int width = overlapX2 - overlapX1;
-//   int height = overlapY2 - overlapY1;
-
-//   // 如果有重疊，計算重疊面積
-//   int overlapArea = 0;
-//   if (width > 0 && height > 0) {
-//     overlapArea = width * height;
-//   }
-
-//   // 計算方形 A 和方形 B 的面積
-//   int areaA = (rectA.x2 - rectA.x1) * (rectA.y2 - rectA.y1);
-//   int areaB = (rectB.x2 - rectB.x1) * (rectB.y2 - rectB.y1);
-
-//   // 計算重疊率
-//   double overlapRatio = 0;
-//   if (overlapArea > 0) {
-//     int minArea = (areaA < areaB) ? areaA : areaB;
-//     overlapRatio = overlapArea / minArea;
-//   }
-
-//   return overlapRatio;
-// }

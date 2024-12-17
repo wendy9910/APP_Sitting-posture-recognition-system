@@ -27,6 +27,7 @@ dependencies:
   sqflite: ^2.3.3+1
   path: ^1.9.0
   fluttertoast: ^8.2.8
+  animated_text_kit: ^4.2.2
 
 
 
@@ -42,11 +43,23 @@ flutter:
     - assets/images/background.jpg
     - assets/images/chair.png
     - assets/images/cat.png
-    - assets/images/sit1.png
-    - assets/images/sit2.png
     - assets/images/add.png
     - assets/images/idol.png
     - assets/images/P1.png
+    - assets/images/FRwB.png
+    - assets/images/LF.png
+    - assets/images/LKoRK.png
+    - assets/images/LR.png
+    - assets/images/LS.png
+    - assets/images/RKoLK.png
+    - assets/images/RR.png
+    - assets/images/UPwB.png
+    - assets/images/UPwoB.png
+    - assets/images/bk.png
+    - assets/images/bk2.jpg
+    - assets/images/Office_Chair.png
+    - assets/images/BG3.jpg
+    - assets/images/bluetooth.png
   fonts:
   - family: Rainbow
     fonts:

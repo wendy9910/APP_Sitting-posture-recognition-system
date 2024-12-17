@@ -14,71 +14,38 @@ class StartPage extends StatefulWidget {
 }
 
 class _StartPageState extends State<StartPage> {
-  Duration duration = Duration(); // 计时器的初始持续时间设置为0
+  Duration duration = Duration(); // 計時器初始時間為0
   Timer? timer;
-  bool isRunning = false; // 计时器是否正在运行的标记
+  bool isRunning = false; // 計時器是否運行
   bool hasStarted = false; // 计时器是否开始过的标记
 
-  PostureDetector detector = PostureDetector(); // 创建PostureDetector的实例
+  PostureDetector detector = PostureDetector(); // 創建PostureDetector實例
+
   String backgroundImage = 'assets/images/background.jpg';
-
-  String upperBodyText = 'BackUpright';
-  String lowerBodyText = 'LegStraight';
-
-  int ImageID_upper = 0;
-  int ImageID_lower = 0;
-
-  List<String> UpperImageLabel = [
-    'assets/images/UPwoB.png',
+  List<String> upperbodyImage = [
     'assets/images/UPwB.png',
+    'assets/images/UPwoB.png',
     'assets/images/LF.png',
     'assets/images/LR.png',
     'assets/images/RR.png',
-    'assets/images/FRwB.png'
+    'assets/images/FRwB.png',
   ];
-  List<String> LegImageLabel = [
+  List<String> lowerbodyImage = [
     'assets/images/LS.png',
     'assets/images/LKoRK.png',
-    'assets/images/RKoLK.png',
+    'assets/images/RKoLK.png'
   ];
+
+  String upperBodyText = 'BackUpright';
+  String lowerBodyText = 'FootStraight';
+
+  // 总检测次数
+  int totalDetect = 0;
 
   @override
   void initState() {
     super.initState();
     duration = Duration(minutes: globals.sittingTime.round());
-  }
-
-  int UpperSelectID(String label) {
-    switch (label) {
-      case 'BackUpright':
-        return 0;
-      case 'BackRest':
-        return 1;
-      case 'BackHunchedForward':
-        return 2;
-      case 'BackSlouchingLeft':
-        return 3;
-      case 'BackSlouchingRight':
-        return 4;
-      case 'OnTheEdgeRest':
-        return 5;
-      default:
-        return 0;
-    }
-  }
-
-  int LowerSelectID(String label) {
-    switch (label) {
-      case 'LegStraight':
-        return 0;
-      case 'LegCrossedLeft':
-        return 1;
-      case 'LegCrossedRight':
-        return 2;
-      // Add other cases as needed
-      default:
-        return 0;
-    }
   }
 
   void startTimer() async {
@@ -120,12 +87,9 @@ class _StartPageState extends State<StartPage> {
         bluetoothProvider.setDataType("0");
 
         setState(() {
-          // 从 BluetoothConnectionProvider 獲取數據更新 UI
+          // 从 BluetoothConnectionProvider 中获取数据并更新 UI
           upperBodyText = bluetoothProvider.getUpperBodyText();
           lowerBodyText = bluetoothProvider.getLowerBodyText();
-
-          ImageID_upper = UpperSelectID(upperBodyText);
-          ImageID_lower = LowerSelectID(lowerBodyText);
 
           // 根據設定來處理偵測到的數據
           detector.receiveData(
@@ -195,44 +159,32 @@ class _StartPageState extends State<StartPage> {
 
   @override
   Widget build(BuildContext context) {
+    // final bluetoothProvider = Provider.of<BluetoothConnectionProvider>(context);
+
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/BG3.jpg'),
-            fit: BoxFit.cover,
-          ),
-          gradient: LinearGradient(
-            colors: [
-              Color.fromARGB(120, 240, 240, 240),
-              Color.fromARGB(180, 116, 116, 116),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
+        color: const Color.fromARGB(255, 237, 244, 245),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            SizedBox(height: 100),
+            SizedBox(height: 150),
             Text(
               'Your sitting posture is ',
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 28,
+              style: TextStyle(
+                fontSize: 30,
                 fontWeight: FontWeight.bold,
-                fontFamily: 'DengXian',
-                color: Color.fromARGB(255, 30, 30, 30), // 深色文字
+                color: Color.fromARGB(221, 40, 39, 39), // 深色文字
               ),
             ),
-            SizedBox(height: 80),
+            SizedBox(height: 100),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Flexible(
-                  flex: 5,
+                  flex: 2,
                   child: Image.asset(
-                    UpperImageLabel[ImageID_upper],
+                    'assets/images/sit2.png',
                     fit: BoxFit.contain,
                   ),
                 ),
@@ -244,15 +196,15 @@ class _StartPageState extends State<StartPage> {
                   ),
                 ),
                 Flexible(
-                  flex: 4,
+                  flex: 3,
                   child: Image.asset(
-                    LegImageLabel[ImageID_lower],
+                    'assets/images/sit1.png',
                     fit: BoxFit.contain,
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 40),
+            SizedBox(height: 50),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -321,12 +273,12 @@ enum UpperBodyAction {
 }
 
 enum LowerBodyAction {
-  LegStraight,
-  LegCrossedLeft,
-  LegCrossedRight,
+  FootStraight,
+  FootCrossedLeft,
+  FootCrossedRight,
 }
 
-// // PostureDetector 負責姿勢檢測邏輯
+// // PostureDetector 类负责处理姿势检测逻辑
 class PostureDetector {
   Timer? errorTimer;
   bool isIncorrectPostureOngoing = false;
@@ -339,13 +291,35 @@ class PostureDetector {
   List<bool> upperBodyHistory = [];
   List<bool> lowerBodyHistory = [];
 
+  // 总检测次数
+  int totalDetect = 0;
+
   PostureDetector() {
     // 初始化计数器
     UpperBodyAction.values.forEach((action) => upperBodyCounters[action] = 0);
     LowerBodyAction.values.forEach((action) => lowerBodyCounters[action] = 0);
   }
 
+  // 更新姿势检测计数器
+  void updateCounters(
+      UpperBodyAction upperBodyAction, LowerBodyAction lowerBodyAction) {
+    upperBodyCounters.update(upperBodyAction, (value) => value + 1,
+        ifAbsent: () => 1);
+    lowerBodyCounters.update(lowerBodyAction, (value) => value + 1,
+        ifAbsent: () => 1);
+    totalDetect++;
+  }
+
+  Map<String, dynamic> getStatistics() {
+    return {
+      'totalDetect': totalDetect,
+      'upperBodyCounters': upperBodyCounters,
+      'lowerBodyCounters': lowerBodyCounters,
+    };
+  }
+
   bool isUpperBodyPostureIncorrect(UpperBodyAction action) {
+    // 定义上半身错误坐姿
     const incorrectPostures = {
       UpperBodyAction.BackHunchedForward,
       UpperBodyAction.BackSlouchingLeft,
@@ -356,9 +330,10 @@ class PostureDetector {
   }
 
   bool isLowerBodyPostureIncorrect(LowerBodyAction action) {
+    // 定义下半身错误坐姿
     const incorrectPostures = {
-      LowerBodyAction.LegCrossedLeft,
-      LowerBodyAction.LegCrossedRight,
+      LowerBodyAction.FootCrossedLeft,
+      LowerBodyAction.FootCrossedRight,
     };
     return incorrectPostures.contains(action);
   }
@@ -409,13 +384,12 @@ class PostureDetector {
     try {
       UpperBodyAction upperAction = decodeUpperBodyAction(upperBodyText);
       LowerBodyAction lowerAction = decodeLowerBodyAction(lowerBodyText);
-      // updateCounters(upperAction, lowerAction);
+      updateCounters(upperAction, lowerAction);
 
       // 檢查姿勢是否不正確
       bool upperIncorrect = isUpperBodyPostureIncorrect(upperAction);
       bool lowerIncorrect = isLowerBodyPostureIncorrect(lowerAction);
 
-      //若有不良坐姿跳出提醒
       if (isRealTime) {
         if (upperIncorrect || lowerIncorrect && !globals.isDialogShowing) {
           await showAlert(context); // Wait for the user to close the dialog
@@ -452,12 +426,12 @@ class PostureDetector {
 
   LowerBodyAction decodeLowerBodyAction(String code) {
     switch (code) {
-      case 'LegStraight':
-        return LowerBodyAction.LegStraight;
-      case 'LegCrossedLeft':
-        return LowerBodyAction.LegCrossedLeft;
-      case 'LegCrossedRight':
-        return LowerBodyAction.LegCrossedRight;
+      case 'FootStraight':
+        return LowerBodyAction.FootStraight;
+      case 'FootCrossedLeft':
+        return LowerBodyAction.FootCrossedLeft;
+      case 'FootCrossedRight':
+        return LowerBodyAction.FootCrossedRight;
       // Add other cases as needed
       default:
         throw Exception('Invalid code for lower body action');
@@ -499,9 +473,38 @@ class PostureDetector {
     });
   }
 
+  // Future<void> showAlert(BuildContext context) async {
+  //   if (globals.isDialogShowing) {
+  //     return; // 如果已經有對話框在展示，則不再展示新的對話框
+  //   }
+  //   globals.isDialogShowing = true; // 設置標誌為真，表示對話框正在展示
+
+  //   await showDialog(
+  //     context: context,
+  //     barrierDismissible: false,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: Text('Incorrect Posture Detected'),
+  //         content: Text(
+  //             'Your posture is incorrect. Please adjust your sitting position.'),
+  //         actions: <Widget>[
+  //           ElevatedButton(
+  //             child: Text('OK'),
+  //             onPressed: () {
+  //               Navigator.of(context).pop(); // This will close the dialog
+  //               globals.isDialogShowing = false; // 重置對話框顯示標誌
+  //             },
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
+
   // 重置计数器
   void reset() {
     upperBodyCounters.updateAll((key, value) => 0);
     lowerBodyCounters.updateAll((key, value) => 0);
+    totalDetect = 0;
   }
 }

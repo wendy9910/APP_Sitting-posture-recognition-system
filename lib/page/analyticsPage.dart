@@ -24,46 +24,21 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     const Color.fromARGB(255, 244, 140, 204),
   ];
 
+  final upperBodyLabels = [
+    "BackRest",
+    "BackUpright",
+    "BackHunchedForward",
+    "BackSlouchingLeft",
+    "BackSlouchingRight",
+    "OnTheEdgeRest"
+  ];
+  final feetLabels = ["LegStraight", "LegCrossedLeft", "LegCrossedRight"];
+
   @override
   void initState() {
     super.initState();
     loadTasks();
   }
-
-  // Future<void> loadTasks() async {
-  //   List<Task> tasksData = await TaskDB.instance.getTasks(); // 加载所有任务
-  //   List<Duration?> durations = []; // 存储每个任务的持续时间
-
-  //   for (var task in tasksData) {
-  //     Duration? duration = await TaskDB.instance.getTaskDuration(task.taskId);
-  //     print("Task ID: ${task.taskId}");
-  //     print("Start Time: ${task.startTime}");
-  //     print("End Time: ${task.endTime}");
-
-  //     durations.add(duration); // 将计算结果添加到列表中
-  //   }
-
-  //   if (tasksData.isNotEmpty) {
-  //     // 排序（如果没有按照时间戳或ID自动排序的话）
-  //     tasksData
-  //         .sort((a, b) => b.startTime.compareTo(a.startTime)); // 假设按时间排序，新的在前
-
-  //     setState(() {
-  //       tasks = tasksData;
-  //       //taskDurations = durations; // 更新持续时间的状态
-  //       selectedTask = tasks.first; // 设置最新的任务为选中的任务
-  //       loadPostureData(); // 加载最新任务的数据
-  //     });
-  //   } else {
-  //     // 如果没有任务，清空当前状态
-  //     setState(() {
-  //       tasks = [];
-  //       //taskDurations = [];
-  //     });
-  //   }
-
-  //   print("Loaded tasks: $tasksData"); // 檢查加載的數據
-  // }
 
   Future<void> loadTasks() async {
     List<Task> tasksData = await TaskDB.instance.getTasks(); // 加载所有任务
@@ -133,118 +108,117 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(150, 237, 244, 245),
-      body: tasks.isEmpty
-          ? Center(child: CircularProgressIndicator())
-          : Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                SizedBox(height: 40),
-                DropdownButton<Task>(
-                  value: selectedTask,
-                  onChanged: (Task? newValue) {
-                    if (newValue != null) {
-                      setState(() {
-                        selectedTask = newValue;
-                        loadPostureData();
-                      });
-                    }
-                  },
-                  items: tasks.map<DropdownMenuItem<Task>>((Task task) {
-                    return DropdownMenuItem<Task>(
-                      value: task,
-                      child: Text(task.startTime),
-                    );
-                  }).toList(),
-                ),
-                SizedBox(height: 10),
-                ToggleButtons(
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text('Upper body posture'),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text('Feet posture'),
-                    ),
-                  ],
-                  isSelected: isSelected,
-                  onPressed: (int index) {
-                    setState(() {
-                      for (int buttonIndex = 0;
-                          buttonIndex < isSelected.length;
-                          buttonIndex++) {
-                        isSelected[buttonIndex] = buttonIndex == index;
+      // backgroundColor: const Color.fromARGB(150, 237, 244, 245),
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/BG3.jpg'),
+            fit: BoxFit.cover,
+          ),
+          gradient: LinearGradient(
+            colors: [
+              Color.fromARGB(120, 240, 240, 240),
+              Color.fromARGB(180, 116, 116, 116),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: tasks.isEmpty
+            ? Center(child: CircularProgressIndicator())
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  SizedBox(height: 40),
+                  DropdownButton<Task>(
+                    value: selectedTask,
+                    onChanged: (Task? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          selectedTask = newValue;
+                          loadPostureData();
+                        });
                       }
-                      displayType = index == 0 ? 'upper' : 'feet';
-                    });
-                  },
-                  color: Colors.black,
-                  selectedColor: Colors.white,
-                  fillColor: const Color.fromARGB(255, 163, 185, 195),
-                  borderRadius: BorderRadius.zero,
-                ),
-                SizedBox(height: 20),
-                // if (selectedTask != null)...[
-                //   Text(
-                //       'Duration: ${taskDurations[tasks.indexOf(selectedTask)]?.inMinutes ?? 'Not finished'} minutes'),
-                //   // 顯示總體時間
-                //   SizedBox(height: 10),
-                // ],
-
-                if (selectedTask != null) ...[
-                  Text(
-                    ' ${taskDurations.isNotEmpty && tasks.contains(selectedTask) && taskDurations[tasks.indexOf(selectedTask)] != null ? formatDuration(taskDurations[tasks.indexOf(selectedTask)]!) : 'Not finished'}',
-                    style: TextStyle(fontSize: 20),
+                    },
+                    items: tasks.map<DropdownMenuItem<Task>>((Task task) {
+                      return DropdownMenuItem<Task>(
+                        value: task,
+                        child: Text(task.startTime),
+                      );
+                    }).toList(),
                   ),
-                  // 顯示總體時間
                   SizedBox(height: 10),
-                ],
-
-                SizedBox(height: 20),
-                Expanded(
-                  child: PieChart(
-                    PieChartData(
-                      sections: _createSampleData(),
-                      centerSpaceRadius: 60,
-                      sectionsSpace: 2,
-                    ),
-                    swapAnimationDuration: Duration(milliseconds: 150),
+                  ToggleButtons(
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text('Upper body posture'),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text('Leg posture'),
+                      ),
+                    ],
+                    isSelected: isSelected,
+                    onPressed: (int index) {
+                      setState(() {
+                        for (int buttonIndex = 0;
+                            buttonIndex < isSelected.length;
+                            buttonIndex++) {
+                          isSelected[buttonIndex] = buttonIndex == index;
+                        }
+                        displayType = index == 0 ? 'upper' : 'leg';
+                      });
+                    },
+                    color: Colors.black,
+                    selectedColor: Colors.white,
+                    fillColor: const Color.fromARGB(255, 163, 185, 195),
+                    borderRadius: BorderRadius.zero,
                   ),
-                ),
-                _buildLegend(),
-                SizedBox(height: 40),
-              ],
-            ),
+                  SizedBox(height: 20),
+                  if (selectedTask != null) ...[
+                    Text(
+                      ' ${taskDurations.isNotEmpty && tasks.contains(selectedTask) && taskDurations[tasks.indexOf(selectedTask)] != null ? formatDuration(taskDurations[tasks.indexOf(selectedTask)]!) : 'Not finished'}',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    // 顯示總體時間
+                    SizedBox(height: 10),
+                  ],
+                  SizedBox(height: 20),
+                  Expanded(
+                    child: PieChart(
+                      PieChartData(
+                        sections: _createSampleData(),
+                        centerSpaceRadius: 60,
+                        sectionsSpace: 2,
+                      ),
+                      swapAnimationDuration: Duration(milliseconds: 150),
+                    ),
+                  ),
+                  _buildLegend(),
+                  SizedBox(height: 40),
+                ],
+              ),
+      ),
     );
   }
 
   Widget _buildLegend() {
-    final upperBodyLabels = [
-      "BackRest",
-      "BackUpright",
-      "BackHunchedForward",
-      "BackSlouchingLeft",
-      "BackSlouchingRight",
-      "OnTheEdgeRest"
-    ];
-    // 脚部姿态标签
-    final feetLabels = ["FootStraight", "FootCrossedLeft", "FootCrossedRight"];
-
     var filteredStats = selectedTask.stats?.where((stat) {
       if (displayType == 'upper') {
-        return upperBodyLabels.contains(stat.postureType); // 使用包含关系进行过滤
+        return upperBodyLabels.contains(stat.postureType);
       } else {
-        return feetLabels.contains(stat.postureType); // 使用包含关系进行过滤
+        return feetLabels.contains(stat.postureType);
       }
     }).toList();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: List<Widget>.generate(filteredStats?.length ?? 0, (index) {
+        final originalLabel = filteredStats![index].postureType;
+
         return Padding(
-          padding: EdgeInsets.symmetric(vertical: 4), // 設置垂直間距
+          padding: EdgeInsets.symmetric(vertical: 4),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -257,7 +231,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                 ),
               ),
               SizedBox(width: 5),
-              Text('${filteredStats![index].postureType}'),
+              Text(originalLabel), // 使用映射后的標籤
             ],
           ),
         );
@@ -265,6 +239,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     );
   }
 
+  //圓餅圖顯示
   List<PieChartSectionData> _createSampleData() {
     final colors = [
       Colors.red,
@@ -273,24 +248,13 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
       Colors.orange,
       Colors.purple,
       const Color.fromARGB(255, 244, 140, 204),
-    ]; // 姿态颜色
-    final upperBodyLabels = [
-      "BackRest",
-      "BackUpright",
-      "BackHunchedForward",
-      "BackSlouchingLeft",
-      "BackSlouchingRight",
-      "OnTheEdgeRest"
     ];
-    // 脚部姿态标签
-    final feetLabels = ["FootStraight", "FootCrossedLeft", "FootCrossedRight"];
 
-    // 根据 displayType 筛选数据
     var filteredStats = selectedTask.stats?.where((stat) {
       if (displayType == 'upper') {
-        return upperBodyLabels.contains(stat.postureType); // 使用包含关系进行过滤
+        return upperBodyLabels.contains(stat.postureType);
       } else {
-        return feetLabels.contains(stat.postureType); // 使用包含关系进行过滤
+        return feetLabels.contains(stat.postureType);
       }
     }).toList();
 
@@ -298,11 +262,12 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
       filteredStats?.length ?? 0,
       (index) {
         final currentStat = filteredStats![index];
+
         return PieChartSectionData(
           color: colors[index % colors.length],
           value: double.parse(currentStat.count.toString()),
           radius: 50,
-          title: '', // 移除标签文字
+          title: "",
         );
       },
     );

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart'; // 狀態管理套件
 import 'bluetoothcontrol.dart';
@@ -8,6 +8,13 @@ import 'StartPage.dart';
 import 'SettingPage.dart';
 import 'CalibrationPage.dart';
 import 'dart:ui';
+
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+
+import '../bluetoothPage/BackgroundCollectingTask.dart';
+import '../bluetoothPage/DiscoveryPage.dart';
+import '../bluetoothPage/SelectBondedDevicePage.dart';
+import '../bluetoothPage/BluetoothConnectionProvider.dart';
 
 class MainPage extends StatefulWidget {
   @override
@@ -76,34 +83,49 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       bottomNavigationBar: Consumer<MyAppState>(
         builder: (context, appState, child) {
-          return BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: const Color.fromARGB(255, 202, 235, 249), // 修改背景顏色
-            selectedItemColor:
-                const Color.fromARGB(255, 103, 187, 106), // 修改選中項目的顏色
-            unselectedItemColor:
-                const Color.fromARGB(255, 91, 90, 90), // 修改未選中項目的顏色
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: 'Home',
+          return Column(
+            mainAxisSize: MainAxisSize.min, // 選單區域緊湊排列
+            children: [
+              // 分隔線
+              Container(
+                height: 1,
+                color: const Color.fromARGB(255, 220, 220, 220), // 分隔線顏色
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.slideshow_rounded),
-                label: 'Start',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.analytics),
-                label: 'Analytics',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.settings_rounded),
-                label: 'Settings',
+              // 底部導航欄
+              BottomNavigationBar(
+                type: BottomNavigationBarType.fixed,
+                backgroundColor:
+                    const Color.fromARGB(255, 240, 240, 240), // 調整背景顏色為淺灰色
+                selectedItemColor:
+                    const Color.fromARGB(255, 0, 86, 179), // 調整選中項目顏色為深藍色
+                unselectedItemColor:
+                    const Color.fromARGB(255, 130, 130, 130), // 調整未選中項目顏色為中灰色
+                selectedFontSize: 14, // 選中項目文字大小
+                unselectedFontSize: 12, // 未選中項目文字大小
+                elevation: 8, // 提升選單陰影效果
+                items: const <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.home),
+                    label: 'Home',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.slideshow_rounded),
+                    label: 'Start',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.analytics),
+                    label: 'Analytics',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.settings_rounded),
+                    label: 'Settings',
+                  ),
+                ],
+                currentIndex: appState.selectedIndex,
+                // selectedItemColor: Theme.of(context).colorScheme.secondary,
+                onTap: _onItemTapped,
               ),
             ],
-            currentIndex: appState.selectedIndex,
-            // selectedItemColor: Theme.of(context).colorScheme.secondary,
-            onTap: _onItemTapped,
           );
         },
       ),
@@ -114,39 +136,28 @@ class _MyHomePageState extends State<MyHomePage> {
 class GeneratorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    //var appState = context.watch<MyAppState>();
-    // String backgroundImage = 'assets/images/background.jpg';
-
     return Container(
-      // color: const Color.fromARGB(255, 237, 244, 245),
-      // decoration: BoxDecoration(
-      //     // Use BoxDecoration to set the background image
-      //     image: DecorationImage(
-      //       image: AssetImage(backgroundImage),
-      //       fit: BoxFit.cover, // Cover the entire widget area
-      //     ),
-
-      //     ),
-      color: const Color.fromARGB(150, 237, 244, 245),
-      // decoration: BoxDecoration(
-      //   gradient: LinearGradient(
-      //     begin: Alignment.topRight,
-      //     end: Alignment.bottomLeft,
-      //     colors: [
-      //       Color.fromARGB(255, 184, 241, 252), // Subtle teal
-      //       Color.fromARGB(255, 231, 245, 247), // Soft sky blue
-      //       Color.fromARGB(
-      //           255, 245, 245, 245), // Off-white for a light, airy feel
-      //     ],
-      //   ),
-      // ),
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/images/BG3.jpg'),
+          fit: BoxFit.cover,
+        ),
+        gradient: LinearGradient(
+          colors: [
+            Color.fromARGB(120, 240, 240, 240),
+            Color.fromARGB(180, 116, 116, 116),
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             BTButton(),
+            SizedBox(height: 20),
             BigCard(),
-            SizedBox(height: 50),
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -159,24 +170,31 @@ class GeneratorPage extends StatelessWidget {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    minimumSize: Size(200, 50), // 设置按钮的最小尺寸
-
+                    minimumSize: const Size(200, 50), // 設置按鈕尺寸
                     padding:
-                        EdgeInsets.symmetric(horizontal: 16), // 也可以通过内边距来调整按钮大小
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)), // 圓角大小
-                    backgroundColor: const Color.fromARGB(255, 163, 185, 195),
-                    foregroundColor: Colors.white, // 按鈕上文字的顏色
+                        const EdgeInsets.symmetric(horizontal: 16), // 調整內邊距
+                    backgroundColor:
+                        const Color.fromARGB(255, 36, 64, 114), // 背景顏色
+                    foregroundColor: Colors.white, // 文字顏色
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero, // 設置直角樣式
+                    ),
+                    elevation: 4, // 增加輕微陰影，提升層次感
+                    shadowColor: Colors.black.withOpacity(0.2), // 陰影顏色
                   ),
-                  child: Text(
+                  child: const Text(
                     'Calibration Task',
                     style: TextStyle(
-                        fontSize: 25,
-                        color: const Color.fromARGB(255, 251, 251, 251)),
+                      fontSize: 24, // 文字大小
+                      fontWeight: FontWeight.w600, // 字體加粗
+                      fontFamily: 'DengXian',
+                      color: Color.fromARGB(255, 245, 247, 250), // 文字顏色
+                    ),
                   ),
                 ),
               ],
             ),
+            SizedBox(height: 150),
           ],
         ),
       ),
@@ -188,29 +206,56 @@ class BTButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: Alignment.topRight,
+      alignment: Alignment.topRight, // 對齊右上角
       child: Padding(
-        padding: const EdgeInsets.only(top: 5.0, right: 8.0),
-        child: Ink(
-          // decoration: ShapeDecoration(
-          //   shape:
-          //       StadiumBorder(), // This makes the background of the button elliptical
-          //   color: Color.fromARGB(221, 226, 225, 236), // You can set the background color of the button here
-          // ),
-          child: IconButton(
-            icon: Icon(
-              Icons.bluetooth,
-              color: Color.fromARGB(221, 27, 2, 249),
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
+        padding: const EdgeInsets.only(top: 10.0, right: 12.0), // 設定邊距
+        child: Container(
+          width: 30, // 按鈕寬度
+          height: 50, // 按鈕高度
+          decoration: BoxDecoration(
+            shape: BoxShape.rectangle,
+            borderRadius: BorderRadius.circular(15), // 圓角設計
+            color: Color.fromARGB(255, 36, 64, 114), // 背景顏色
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(15), // 確保 InkWell 匹配邊角
+            onTap: () async {
+              final BluetoothDevice? selectedDevice =
+                  await Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) =>
-                      BluetoothPage(), // Assuming BluetoothPage is a defined widget
+                  builder: (context) {
+                    return SelectBondedDevicePage(checkAvailability: false);
+                  },
                 ),
               );
+
+              if (selectedDevice != null) {
+                print('Connect -> selected ' + selectedDevice.address);
+
+                // 获取 BluetoothConnectionProvider 并使用它来连接设备
+                final bluetoothProvider =
+                    Provider.of<BluetoothConnectionProvider>(context,
+                        listen: false);
+                await bluetoothProvider.connectToDevice(selectedDevice);
+
+                // 连接成功后，可以在应用程序的其他页面使用 bluetoothProvider.connection 访问连接
+              } else {
+                print('Connect -> no device selected');
+              }
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => BluetoothPage(), // 跳轉到藍牙頁面
+              //   ),
+              // );
             },
+            child: Center(
+              child: Icon(
+                Icons.bluetooth,
+                color: Colors.white, // 白色圖標
+                size: 24, // 圖標大小
+              ),
+            ),
           ),
         ),
       ),
@@ -227,21 +272,74 @@ class BigCard extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center, // 居中對齊
       children: <Widget>[
         Text(
-          'Are you sitting right?',
+          'Sit smart, Stay healthy',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 35,
+          style: const TextStyle(
+            fontSize: 28,
             fontWeight: FontWeight.bold,
-            fontFamily: 'Rainbow',
-            color: Color.fromARGB(221, 40, 39, 39), // 深色文字
+            fontFamily: 'DengXian',
+            color: Color.fromARGB(255, 30, 30, 30), // 深色文字
           ),
         ),
-        SizedBox(height: 20),
-        Image.asset(
-          'assets/images/P1.png', // 確保這個路徑和檔案名稱與實際匹配
-          fit: BoxFit.cover, // 根據需要選擇合適的 BoxFit 屬性
+        const SizedBox(height: 200),
+        DefaultTextStyle(
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'DengXian',
+            color: Color.fromARGB(255, 108, 117, 125), // 深色文字
+          ),
+          child: AnimatedTextKit(
+            animatedTexts: [
+              TypewriterAnimatedText(
+                'Hi! Welcome back...', // 動畫文字
+                textAlign: TextAlign.center, // 居中對齊
+                speed: const Duration(milliseconds: 100), // 每字動畫速度
+              ),
+            ],
+            totalRepeatCount: 1, // 動畫播放一次
+            pause: const Duration(milliseconds: 500), // 播放結束停頓
+            displayFullTextOnTap: true, // 點擊時顯示全部文字
+            stopPauseOnTap: true, // 點擊跳過動畫
+          ),
         ),
+        const SizedBox(height: 70),
       ],
     );
   }
 }
+
+// class BigCard extends StatelessWidget {
+//   const BigCard({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Column(
+//       mainAxisAlignment: MainAxisAlignment.center, // 居中對齊
+//       children: <Widget>[
+//         Text(
+//           'Sit smart, Stay healthy',
+//           textAlign: TextAlign.center,
+//           style: TextStyle(
+//             fontSize: 28,
+//             fontWeight: FontWeight.bold,
+//             fontFamily: 'DengXian',
+//             color: Color.fromARGB(255, 30, 30, 30), // 深色文字
+//           ),
+//         ),
+//         SizedBox(height: 200),
+//         Text(
+//           'Hi ! Welcome back...',
+//           textAlign: TextAlign.center,
+//           style: TextStyle(
+//             fontSize: 24,
+//             fontWeight: FontWeight.bold,
+//             fontFamily: 'DengXian',
+//             color: Color.fromARGB(255, 108, 117, 125), // 深色文字
+//           ),
+//         ),
+//         SizedBox(height: 50),
+//       ],
+//     );
+//   }
+// }

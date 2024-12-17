@@ -69,37 +69,6 @@ class BluetoothConnectionProvider with ChangeNotifier {
     }
   }
 
-  // 處理坐姿數據
-  // void _processPoseData() async {
-  //   int separatorIndex = _buffer.indexOf('_');
-  //   while (separatorIndex != -1) {
-  //     String upperBodyData = _buffer.substring(0, separatorIndex);
-  //     int nextSeparatorIndex = _buffer.indexOf('_', separatorIndex + 1);
-
-  //     if (nextSeparatorIndex != -1) {
-  //       String lowerBodyData =
-  //           _buffer.substring(separatorIndex + 1, nextSeparatorIndex);
-
-  //       _receivedUpperBodyData = upperBodyData;
-  //       _receivedLowerBodyData = lowerBodyData;
-  //       print('上半身資料: $_receivedUpperBodyData');
-  //       print('下半身資料: $_receivedLowerBodyData');
-
-  //       // 儲存到資料庫
-  //       if (globals.currentTaskId != null) {
-  //         await dbInstance.updatePostureStat(
-  //             globals.currentTaskId!, upperBodyData, lowerBodyData);
-  //       }
-
-  //       notifyListeners();
-  //       _buffer = _buffer.substring(nextSeparatorIndex + 1);
-  //     } else {
-  //       break;
-  //     }
-  //     separatorIndex = _buffer.indexOf('_');
-  //   }
-  // }
-
   void _processPoseData() async {
     // 檢查緩衝區中是否有完整的數據集
     int start = _buffer.indexOf('/');
@@ -142,35 +111,6 @@ class BluetoothConnectionProvider with ChangeNotifier {
     }
   }
 
-  // void _processPoseData() {
-  //   // 檢查緩衝區中是否有完整的數據集
-  //   int start = _buffer.indexOf('/');
-  //   int end = _buffer.indexOf('*');
-
-  //   // 確保開始和結束標記都存在，且結束標記在開始標記之後
-  //   while (start != -1 && end != -1 && end > start) {
-  //     // 提取數據
-  //     String dataChunk = _buffer.substring(start + 1, end);
-  //     List<String> parts = dataChunk.split(',');
-
-  //     if (parts.length == 2) {
-  //       _receivedUpperBodyData = parts[0].trim();
-  //       _receivedLowerBodyData = parts[1].trim();
-
-  //       print(
-  //           'Upper Body Action: $_receivedUpperBodyData, Lower Body Action: $_receivedLowerBodyData');
-  //       notifyListeners();
-  //     }
-
-  //     // 更新緩衝區，移除已處理的數據
-  //     _buffer = _buffer.substring(end + 1);
-
-  //     // 重新尋找下一組數據的標記
-  //     start = _buffer.indexOf('/');
-  //     end = _buffer.indexOf('*');
-  //   }
-  // }
-
   void _processCoordinateData() {
     // 檢查緩衝區中是否有完整的數據集
     int start = _buffer.indexOf('/');
@@ -202,12 +142,6 @@ class BluetoothConnectionProvider with ChangeNotifier {
     }
   }
 
-  // 開始新任務時，創建新任務紀錄
-  // Future<void> startNewTask() async {
-  //   String startTime = DateTime.now().toString();
-  //   notifyListeners(); // 通知聽眾更新
-  // }
-
   Future<void> startNewTask() async {
     String startTime = DateTime.now().toString();
     // globals.currentTaskId = await dbInstance.startNewTask(); // 開始新任務，並獲取新任務的ID
@@ -218,15 +152,6 @@ class BluetoothConnectionProvider with ChangeNotifier {
   Future<void> endTask() async {
     notifyListeners(); // 通知聽眾更新
   }
-
-  // Future<void> endTask() async {
-  //   if (_currentTaskId != null) {
-  //     await TaskDB.instance
-  //         .endTask(_currentTaskId!, DateTime.now().toIso8601String());
-  //     _currentTaskId = null; // 重置當前任務ID
-  //     notifyListeners(); // 通知聽眾更新
-  //   }
-  // }
 
   void sendMessage(String message) {
     if (_connection != null && _connection!.isConnected) {

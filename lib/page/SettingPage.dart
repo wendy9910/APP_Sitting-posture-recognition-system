@@ -18,7 +18,21 @@ class _SettingPageState extends State<SettingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: const Color.fromARGB(150, 237, 244, 245),
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/BG3.jpg'),
+            fit: BoxFit.cover,
+          ),
+          gradient: LinearGradient(
+            colors: [
+              Color.fromARGB(120, 240, 240, 240),
+              Color.fromARGB(180, 116, 116, 116),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        // color: const Color.fromARGB(150, 237, 244, 245),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
