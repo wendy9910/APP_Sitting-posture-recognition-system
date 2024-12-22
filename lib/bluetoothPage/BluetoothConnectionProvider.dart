@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'dart:typed_data';
-import 'package:sqflite/sqflite.dart';
 import '../database/task_db.dart';
 import '../global.dart' as globals;
 

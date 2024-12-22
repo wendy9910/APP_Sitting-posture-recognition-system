@@ -1,3 +1,16 @@
+buildscript {
+    ext.kotlin_version = '1.8.22' // 指定 Kotlin 版本 1.7.10
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:8.0.2" // Android Gradle Plugin 版本
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version" // Kotlin Gradle Plugin
+    }
+}
+
+
 allprojects {
     repositories {
         google()
