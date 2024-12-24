@@ -14,12 +14,12 @@ class StartPage extends StatefulWidget {
 }
 
 class _StartPageState extends State<StartPage> {
-  Duration duration = Duration(); // 计时器的初始持续时间设置为0
+  Duration duration = Duration(); // 計時器初始時間
   Timer? timer;
-  bool isRunning = false; // 计时器是否正在运行的标记
-  bool hasStarted = false; // 计时器是否开始过的标记
+  bool isRunning = false; // 計時器是否正在運行
+  bool hasStarted = false; // 計時器是否已經開始過
 
-  PostureDetector detector = PostureDetector(); // 创建PostureDetector的实例
+  PostureDetector detector = PostureDetector();
   String backgroundImage = 'assets/images/background.jpg';
 
   String upperBodyText = 'BackUpright';
@@ -41,12 +41,6 @@ class _StartPageState extends State<StartPage> {
     'assets/images/LKoRK.png',
     'assets/images/RKoLK.png',
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    duration = Duration(minutes: globals.sittingTime.round());
-  }
 
   int UpperSelectID(String label) {
     switch (label) {
@@ -81,22 +75,32 @@ class _StartPageState extends State<StartPage> {
     }
   }
 
+  @override
+  void initState() {
+    super.initState();
+    duration = Duration(minutes: globals.sittingTime.round());
+  }
+
   void startTimer() async {
     final bluetoothProvider =
         Provider.of<BluetoothConnectionProvider>(context, listen: false);
     bluetoothProvider.startNewTask(); // 開始新任務
 
     // 記錄開始時間
-    String startTime = DateTime.now().toIso8601String();
-    int taskId = await TaskDB.instance.startNewTask(startTime);
-    globals.currentTaskId = taskId; // 假設有一個全局變量來存儲當前任務ID
+    if (hasStarted != true) {
+      //當為新的任務時，進入判斷式
+      //若是暫停後重啟，則不新增任務
+      String startTime = DateTime.now().toIso8601String();
+      int taskId = await TaskDB.instance.startNewTask(startTime);
+      globals.currentTaskId = taskId; // 假設有一個全局變量來存儲當前任務ID
+    }
+    hasStarted = true;
 
     if (duration.inSeconds > 0 && !isRunning) {
       setState(() {
         isRunning = true;
       });
 
-      // 使用 Timer 每秒更新 UI
       timer = Timer.periodic(Duration(seconds: 1), (Timer t) {
         if (duration.inSeconds <= 0) {
           t.cancel();
@@ -156,9 +160,11 @@ class _StartPageState extends State<StartPage> {
     });
   }
 
+  //暫停
   void pauseTimer() {
     setState(() {
       isRunning = false;
+      hasStarted = true;
     });
     timer?.cancel();
     final bluetoothProvider =

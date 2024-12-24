@@ -3,10 +3,11 @@
 import 'dart:convert';
 
 class Task {
-  final int taskId;
-  final String startTime;
-  final String? endTime; // 可能為null，表示任務還在進行中
-  final int totalReceptions;
+  //資料庫項目結構
+  final int taskId; //任務編號
+  final String startTime; //入問開始時間
+  final String? endTime; // 結束時間(可能為null，表示任務還在進行中)
+  final int totalReceptions; //收到幾筆資料
   List<TaskStat>? stats;
 
   Task(

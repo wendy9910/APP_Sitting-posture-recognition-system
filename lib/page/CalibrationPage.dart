@@ -374,7 +374,7 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
     double result = calculateIoU(rectA, rectB);
     print('重合率: $result');
 
-    if (result > 0.7) {
+    if (result > 0.8) {
       print("Correct!!");
       isCalibrating = true;
       isCalibrating0 = true;

@@ -142,7 +142,7 @@ class BluetoothConnectionProvider with ChangeNotifier {
   }
 
   Future<void> startNewTask() async {
-    String startTime = DateTime.now().toString();
+    // String startTime = DateTime.now().toString();
     // globals.currentTaskId = await dbInstance.startNewTask(); // 開始新任務，並獲取新任務的ID
     notifyListeners(); // 通知聽眾更新
   }

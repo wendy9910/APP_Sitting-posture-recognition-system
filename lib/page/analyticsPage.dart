@@ -251,13 +251,16 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   }
 
   Widget _buildLegend() {
-    var filteredStats = selectedTask.stats?.where((stat) {
-      if (displayType == 'upper') {
-        return upperBodyLabels.contains(stat.postureType);
-      } else {
-        return feetLabels.contains(stat.postureType);
-      }
-    }).toList();
+    var filteredStats = selectedTask.stats
+        ?.where((stat) {
+          if (displayType == 'upper') {
+            return upperBodyLabels.contains(stat.postureType);
+          } else {
+            return feetLabels.contains(stat.postureType);
+          }
+        })
+        .toSet()
+        .toList();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -297,13 +300,16 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
       const Color.fromARGB(255, 244, 140, 204),
     ];
 
-    var filteredStats = selectedTask.stats?.where((stat) {
-      if (displayType == 'upper') {
-        return upperBodyLabels.contains(stat.postureType);
-      } else {
-        return feetLabels.contains(stat.postureType);
-      }
-    }).toList();
+    var filteredStats = selectedTask.stats
+        ?.where((stat) {
+          if (displayType == 'upper') {
+            return upperBodyLabels.contains(stat.postureType);
+          } else {
+            return feetLabels.contains(stat.postureType);
+          }
+        })
+        .toSet()
+        .toList();
 
     return List.generate(
       filteredStats?.length ?? 0,
