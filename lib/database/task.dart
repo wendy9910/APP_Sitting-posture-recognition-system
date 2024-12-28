@@ -1,7 +1,5 @@
 // task.dart
 
-import 'dart:convert';
-
 class Task {
   //資料庫項目結構
   final int taskId; //任務編號

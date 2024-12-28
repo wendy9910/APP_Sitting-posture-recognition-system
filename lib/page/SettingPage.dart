@@ -1,7 +1,6 @@
-import 'package:english_words/english_words.dart'; // 用於生成隨機英文單詞
+// 用於生成隨機英文單詞
 import 'package:flutter/material.dart'; // Flutter的Material Design包
-import 'package:provider/provider.dart'; // 狀態管理套件
-import 'dart:async';
+// 狀態管理套件
 import '../global.dart' as globals; // 引用全局變量
 
 class SettingPage extends StatefulWidget {

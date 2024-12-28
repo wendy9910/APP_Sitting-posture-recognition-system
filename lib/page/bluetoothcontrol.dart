@@ -108,10 +108,11 @@ class _BluetoothPageState extends State<BluetoothPage> {
                 // Do the request and update with the true value then
                 future() async {
                   // async lambda seems to not working
-                  if (value)
+                  if (value) {
                     await FlutterBluetoothSerial.instance.requestEnable();
-                  else
+                  } else {
                     await FlutterBluetoothSerial.instance.requestDisable();
+                  }
                 }
 
                 future().then((_) {
@@ -256,7 +257,7 @@ class _BluetoothPageState extends State<BluetoothPage> {
                   );
 
                   if (selectedDevice != null) {
-                    print('Connect -> selected ' + selectedDevice.address);
+                    print('Connect -> selected ${selectedDevice.address}');
 
                     // 获取 BluetoothConnectionProvider 并使用它来连接设备
                     final bluetoothProvider =

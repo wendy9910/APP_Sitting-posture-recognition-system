@@ -26,6 +26,8 @@ dependencies:
   path: ^1.9.0
   fluttertoast: ^8.2.8
   animated_text_kit: ^4.2.2
+  soundpool: ^2.4.1
+  # flutter_ringtone_player: ^3.0.0
 
 
 
@@ -58,6 +60,8 @@ flutter:
     - assets/images/Office_Chair.png
     - assets/images/BG3.jpg
     - assets/images/bluetooth.png
+    - assets/mp3/ringtone.mp3
+    - assets/mp3/notification.mp3
   fonts:
   - family: Rainbow
     fonts:

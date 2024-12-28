@@ -3,6 +3,8 @@
 /// @description Simple line chart widget
 /// @author Patryk "PsychoX" Ludwikowski <patryk.ludwikowski.7+dart@gmail.com>
 /// @license MIT License (see https://mit-license.org/)
+library;
+
 import 'dart:math' as math show min, max;
 import 'dart:ui' as ui;
 
@@ -153,7 +155,7 @@ class LineChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-        constraints: this.constraints,
+        constraints: constraints,
         child: CustomPaint(
             painter: _LineChartPainter(
           padding: padding,
@@ -256,7 +258,7 @@ class _LineChartPainter extends CustomPainter {
     double additionalMinimalVerticalLablesInterval = 8,
     required this.seriesPointsPaints,
     required this.seriesLinesPaints,
-  }) : this.minimalHorizontalLabelsInterval =
+  }) : minimalHorizontalLabelsInterval =
             (horizontalLabelsTextStyle?.fontSize ?? 12) +
                 additionalMinimalHorizontalLabelsInterval {
     // Find max & min values of data to be show
@@ -510,7 +512,7 @@ class _LineChartPainter extends CustomPainter {
       Iterator<double> argument = arguments.iterator;
       while (value.moveNext()) {
         argument.moveNext();
-        if (value.current == null || value.current == double.nan) continue;
+        if (value.current == null) continue;
 
         if (argument.current < argumentsOffset) continue;
         final double xOffset = padding.left +
@@ -540,16 +542,15 @@ class _LineChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_LineChartPainter old) =>
-      (this.arguments != old.arguments ||
-          this.values != old.values ||
-          this.argumentsLabels != old.argumentsLabels ||
-          this.valuesLabels != old.valuesLabels ||
-          this.seriesPointsPaints != old.seriesPointsPaints ||
-          this.seriesLinesPaints != old.seriesLinesPaints ||
-          this.horizontalLabelsTextStyle != old.horizontalLabelsTextStyle ||
-          this.verticalLabelsTextStyle != old.verticalLabelsTextStyle ||
-          this.padding != old.padding //
+  bool shouldRepaint(_LineChartPainter old) => (arguments != old.arguments ||
+          values != old.values ||
+          argumentsLabels != old.argumentsLabels ||
+          valuesLabels != old.valuesLabels ||
+          seriesPointsPaints != old.seriesPointsPaints ||
+          seriesLinesPaints != old.seriesLinesPaints ||
+          horizontalLabelsTextStyle != old.horizontalLabelsTextStyle ||
+          verticalLabelsTextStyle != old.verticalLabelsTextStyle ||
+          padding != old.padding //
       );
 
   // ..., 0.01, 0.02, 0.05, 0.1, [0.125], 0.2, [0.25], 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, ...

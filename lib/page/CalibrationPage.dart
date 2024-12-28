@@ -111,7 +111,6 @@ class CalibrationPage extends StatelessWidget {
                               builder: (context) => UpperCalibrationPage()),
                         );
                       },
-                      child: const Text("Upper Sensor Calibration"),
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(200, 50), // 設置按鈕尺寸
                         padding:
@@ -125,6 +124,7 @@ class CalibrationPage extends StatelessWidget {
                         elevation: 4, // 增加輕微陰影，提升層次感
                         shadowColor: Colors.black.withOpacity(0.2), // 陰影顏色
                       ),
+                      child: const Text("Upper Sensor Calibration"),
                     ),
                   ),
                   const SizedBox(height: 30.0),
@@ -138,7 +138,6 @@ class CalibrationPage extends StatelessWidget {
                               builder: (context) => LowerCalibrationPage()),
                         );
                       },
-                      child: const Text("Lower Sensor Calibration"),
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(200, 50), // 設置按鈕尺寸
                         padding:
@@ -152,6 +151,7 @@ class CalibrationPage extends StatelessWidget {
                         elevation: 4, // 增加輕微陰影，提升層次感
                         shadowColor: Colors.black.withOpacity(0.2), // 陰影顏色
                       ),
+                      child: const Text("Lower Sensor Calibration"),
                     ),
                   ),
                 ],
@@ -170,8 +170,17 @@ class UpperCalibrationPage extends StatefulWidget {
 }
 
 class _UpperCalibrationPageState extends State<UpperCalibrationPage> {
-  bool isCalibrating = false; // State to track calibration status
-  bool isCalibrating0 = false;
+  bool isCalibrating = false; // 是否開始校正
+  bool isCalibrating0 = false; // 是否開始校正
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 初始化校正狀態
+    isCalibrating = false;
+    isCalibrating0 = false;
+  }
 
   void toggleCalibration(BuildContext context) {
     final bluetoothProvider =
@@ -194,16 +203,16 @@ class _UpperCalibrationPageState extends State<UpperCalibrationPage> {
   Widget build(BuildContext context) {
     //get value from BluetoothConnectionProvider.dart
     final bluetoothProvider = Provider.of<BluetoothConnectionProvider>(context);
-    String X1_str = bluetoothProvider.getX1();
-    String Y1_str = bluetoothProvider.getY1();
-    String X2_str = bluetoothProvider.getX2();
-    String Y2_str = bluetoothProvider.getY2();
+    String x1Str = bluetoothProvider.getX1();
+    String y1Str = bluetoothProvider.getY1();
+    String x2Str = bluetoothProvider.getX2();
+    String y2Str = bluetoothProvider.getY2();
 
     // 將 String 轉換為 int
-    int x1 = int.tryParse(X1_str) ?? 0;
-    int y1 = int.tryParse(Y1_str) ?? 0;
-    int x2 = int.tryParse(X2_str) ?? 0;
-    int y2 = int.tryParse(Y2_str) ?? 0;
+    int x1 = int.tryParse(x1Str) ?? 0;
+    int y1 = int.tryParse(y1Str) ?? 0;
+    int x2 = int.tryParse(x2Str) ?? 0;
+    int y2 = int.tryParse(y2Str) ?? 0;
     y2 = y1 + (x2 - x1); //調成等比正方形
 
     Rectangle rectA = Rectangle(230, 70, 400, 250);
@@ -224,10 +233,10 @@ class _UpperCalibrationPageState extends State<UpperCalibrationPage> {
 
     //畫面用途
     // 將 String 轉換為 double
-    double X1 = double.tryParse(X1_str) ?? 0; // 如果轉換失敗，預設為 0
-    double Y1 = double.tryParse(Y1_str) ?? 0;
-    double X2 = double.tryParse(X2_str) ?? 0;
-    double Y2 = double.tryParse(Y2_str) ?? 0;
+    double X1 = double.tryParse(x1Str) ?? 0; // 如果轉換失敗，預設為 0
+    double Y1 = double.tryParse(y1Str) ?? 0;
+    double X2 = double.tryParse(x2Str) ?? 0;
+    double Y2 = double.tryParse(y2Str) ?? 0;
 
     Y2 = Y1 + (X2 - X1); //調成等比正方形
 
@@ -302,10 +311,7 @@ class _UpperCalibrationPageState extends State<UpperCalibrationPage> {
             ),
             SizedBox(height: 40),
             ElevatedButton(
-              onPressed: () => toggleCalibration(context),
-              child: Text(isCalibrating
-                  ? 'Stop Calibration'
-                  : 'Start Calibration'), // Toggle button text
+              onPressed: () => toggleCalibration(context), // Toggle button text
               style: ElevatedButton.styleFrom(
                 minimumSize: Size(200, 50),
                 padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -319,6 +325,8 @@ class _UpperCalibrationPageState extends State<UpperCalibrationPage> {
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
+              child: Text(
+                  isCalibrating ? 'Stop Calibration' : 'Start Calibration'),
             ),
           ],
         ),
@@ -333,8 +341,17 @@ class LowerCalibrationPage extends StatefulWidget {
 }
 
 class _LowerCalibrationPage extends State<LowerCalibrationPage> {
-  bool isCalibrating = false; // State to track calibration status
+  bool isCalibrating = false;
   bool isCalibrating0 = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 初始化校正狀態
+    isCalibrating = false;
+    isCalibrating0 = false;
+  }
 
   void toggleCalibration(BuildContext context) {
     final bluetoothProvider =
@@ -356,16 +373,16 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
   Widget build(BuildContext context) {
     final bluetoothProvider = Provider.of<BluetoothConnectionProvider>(context);
 
-    String X1_str = bluetoothProvider.getX1(); // 取得 x1 (String)
-    String Y1_str = bluetoothProvider.getY1(); // 取得 y1 (String)
-    String X2_str = bluetoothProvider.getX2(); // 取得 x2 (String)
-    String Y2_str = bluetoothProvider.getY2(); // 取得 y2 (String)
+    String x1Str = bluetoothProvider.getX1(); // 取得 x1 (String)
+    String y1Str = bluetoothProvider.getY1(); // 取得 y1 (String)
+    String x2Str = bluetoothProvider.getX2(); // 取得 x2 (String)
+    String y2Str = bluetoothProvider.getY2(); // 取得 y2 (String)
 
     // 將 String 轉換為 int
-    int x1 = int.tryParse(X1_str) ?? 0; // 如果轉換失敗，預設為 0
-    int y1 = int.tryParse(Y1_str) ?? 0;
-    int x2 = int.tryParse(X2_str) ?? 0;
-    int y2 = int.tryParse(Y2_str) ?? 0;
+    int x1 = int.tryParse(x1Str) ?? 0; // 如果轉換失敗，預設為 0
+    int y1 = int.tryParse(y1Str) ?? 0;
+    int x2 = int.tryParse(x2Str) ?? 0;
+    int y2 = int.tryParse(y2Str) ?? 0;
 
     Rectangle rectA = Rectangle(280, 160, 640, 480);
     Rectangle rectB = Rectangle(x1, y1, x2, y2);
@@ -384,10 +401,10 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
 
     //畫出畫面
     // 將 String 轉換為 double
-    double X1 = double.tryParse(X1_str) ?? 0; // 如果轉換失敗，預設為 0
-    double Y1 = double.tryParse(Y1_str) ?? 0;
-    double X2 = double.tryParse(X2_str) ?? 0;
-    double Y2 = double.tryParse(Y2_str) ?? 0;
+    double X1 = double.tryParse(x1Str) ?? 0; // 如果轉換失敗，預設為 0
+    double Y1 = double.tryParse(y1Str) ?? 0;
+    double X2 = double.tryParse(x2Str) ?? 0;
+    double Y2 = double.tryParse(y2Str) ?? 0;
 
     double W = (X2 - X1) / 2; // 計算寬度
     double H = (Y2 - Y1) / 2; // 計算高度
@@ -460,10 +477,7 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
             ),
             SizedBox(height: 40),
             ElevatedButton(
-              onPressed: () => toggleCalibration(context),
-              child: Text(isCalibrating
-                  ? 'Stop Calibration'
-                  : 'Start Calibration'), // Toggle button text
+              onPressed: () => toggleCalibration(context), // Toggle button text
               style: ElevatedButton.styleFrom(
                 minimumSize: Size(200, 50),
                 padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -478,6 +492,8 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
+              child: Text(
+                  isCalibrating ? 'Stop Calibration' : 'Start Calibration'),
             ),
           ],
         ),

@@ -2,11 +2,12 @@ import 'package:flutter/material.dart'; // Flutter的Material Design包
 import 'package:provider/provider.dart'; // 狀態管理套件
 import 'dart:async';
 import '../global.dart' as globals;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 import '../bluetoothPage/BluetoothConnectionProvider.dart';
 import '../database/task_db.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:soundpool/soundpool.dart';
+import 'package:flutter/services.dart'; // 用於加載音效
+// import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 
 class StartPage extends StatefulWidget {
   @override
@@ -144,9 +145,7 @@ class _StartPageState extends State<StartPage> {
 
   void _endTask() async {
     await TaskDB.instance.endTask(globals.currentTaskId);
-    await detector.saveData();
 
-    detector.reset();
     final bluetoothProvider =
         Provider.of<BluetoothConnectionProvider>(context, listen: false);
     bluetoothProvider.sendMessage("1"); // Send start signal
@@ -337,7 +336,11 @@ class PostureDetector {
   Timer? errorTimer;
   bool isIncorrectPostureOngoing = false;
   int errorPostureCount = 0;
-  // 计数器，记录各种姿势的检测次数
+
+  late Soundpool _soundpool;
+  int? _soundId; // 儲存音效的 ID
+
+  //姿勢計數
   final Map<UpperBodyAction, int> upperBodyCounters = {};
   final Map<LowerBodyAction, int> lowerBodyCounters = {};
 
@@ -346,9 +349,15 @@ class PostureDetector {
   List<bool> lowerBodyHistory = [];
 
   PostureDetector() {
-    // 初始化计数器
-    UpperBodyAction.values.forEach((action) => upperBodyCounters[action] = 0);
-    LowerBodyAction.values.forEach((action) => lowerBodyCounters[action] = 0);
+    _soundpool = Soundpool(); // 初始化 Soundpool
+    _loadSound(); // 加載音效
+    // 初始化計數器
+    for (var action in UpperBodyAction.values) {
+      upperBodyCounters[action] = 0;
+    }
+    for (var action in LowerBodyAction.values) {
+      lowerBodyCounters[action] = 0;
+    }
   }
 
   bool isUpperBodyPostureIncorrect(UpperBodyAction action) {
@@ -367,24 +376,6 @@ class PostureDetector {
       LowerBodyAction.LegCrossedRight,
     };
     return incorrectPostures.contains(action);
-  }
-
-  // 保存数据到 SharedPreferences
-  Future<void> saveData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final timestamp = DateTime.now().toIso8601String();
-
-    final Map<String, dynamic> data = {
-      'timestamp': timestamp,
-      'upperBodyCounters':
-          upperBodyCounters.map((k, v) => MapEntry(k.toString(), v)),
-      'lowerBodyCounters':
-          lowerBodyCounters.map((k, v) => MapEntry(k.toString(), v)),
-    };
-
-    final records = prefs.getStringList('postureRecords') ?? [];
-    records.add(jsonEncode(data));
-    await prefs.setStringList('postureRecords', records);
   }
 
   void updateSlidingWindow(bool upperIncorrect, bool lowerIncorrect) {
@@ -421,15 +412,28 @@ class PostureDetector {
       bool upperIncorrect = isUpperBodyPostureIncorrect(upperAction);
       bool lowerIncorrect = isLowerBodyPostureIncorrect(lowerAction);
 
+      //提示音效
+
       //若有不良坐姿跳出提醒
       if (isRealTime) {
         if (upperIncorrect || lowerIncorrect && !globals.isDialogShowing) {
           await showAlert(context); // Wait for the user to close the dialog
+          //提醒音效
+          _soundpool.play(_soundId!);
+          // FlutterRingtonePlayer().playNotification();
+        } else {
+          _soundpool.stop(_soundId!);
+          // FlutterRingtonePlayer().stop();
         }
       } else {
         updateSlidingWindow(upperIncorrect, lowerIncorrect);
         if (shouldTriggerAlert() && !globals.isDialogShowing) {
+          _soundpool.play(_soundId!);
           await showAlert(context);
+          // FlutterRingtonePlayer().playNotification();
+        } else {
+          _soundpool.stop(_soundId!);
+          // FlutterRingtonePlayer().stop();
         }
       }
     } catch (e) {
@@ -480,34 +484,37 @@ class PostureDetector {
     Fluttertoast.showToast(
       msg: message,
       toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.TOP, // 设置为顶部显示
+      gravity: ToastGravity.TOP, // 設置頂部提醒時間
       backgroundColor: Colors.black54,
       textColor: Colors.white,
       fontSize: 16.0,
-      timeInSecForIosWeb: 1, // 设置提示框显示的时间（1秒）
+      timeInSecForIosWeb: 1, // 設置顯示提醒時間（1秒）
     );
+  }
+
+  Future<void> _loadSound() async {
+    try {
+      var asset = await rootBundle.load('assets/mp3/notification.mp3');
+      _soundId = await _soundpool.load(asset); // 加載音效並儲存 ID
+      print('Sound loaded with ID: $_soundId');
+    } catch (e) {
+      print('Failed to load sound: $e');
+      _soundId = null; // 確保初始化失敗時不拋出錯誤
+    }
   }
 
   Future<void> showAlert(BuildContext context) async {
     if (globals.isDialogShowing) {
       return; // 如果已經有提示框在展示，則不再展示新的提示框
     }
-
     globals.isDialogShowing = true; // 設置標誌為真，表示提示框正在展示
 
-    // 显示Toast消息
+    // 顯示提醒
     showTopToast(
         'Incorrect Posture Detected. Please adjust your sitting position.');
-
-    // 自动在1秒后重置对话框标志
+    // 自動在一秒後重置
     Future.delayed(Duration(seconds: 1), () {
-      globals.isDialogShowing = false; // 重置提示框标志
+      globals.isDialogShowing = false;
     });
-  }
-
-  // 重置计数器
-  void reset() {
-    upperBodyCounters.updateAll((key, value) => 0);
-    lowerBodyCounters.updateAll((key, value) => 0);
   }
 }

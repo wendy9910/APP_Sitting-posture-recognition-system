@@ -12,7 +12,7 @@ import '../bluetoothPage/BluetoothConnectionProvider.dart';
 
 class MainPage extends StatefulWidget {
   @override
-  _MainPage createState() => new _MainPage();
+  _MainPage createState() => _MainPage();
 }
 
 class _MainPage extends State<MainPage> {
@@ -264,7 +264,7 @@ class BTButton extends StatelessWidget {
               );
 
               if (selectedDevice != null) {
-                print('Connect -> selected ' + selectedDevice.address);
+                print('Connect -> selected ${selectedDevice.address}');
 
                 // 获取 BluetoothConnectionProvider 并使用它来连接设备
                 final bluetoothProvider =

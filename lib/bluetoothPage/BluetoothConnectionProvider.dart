@@ -90,10 +90,8 @@ class BluetoothConnectionProvider with ChangeNotifier {
       }
 
       // 儲存到資料庫
-      if (globals.currentTaskId != null) {
-        await dbInstance.updatePostureStat(globals.currentTaskId!,
-            _receivedUpperBodyData, _receivedLowerBodyData);
-      }
+      await dbInstance.updatePostureStat(globals.currentTaskId!,
+          _receivedUpperBodyData, _receivedLowerBodyData);
 
       // 更新緩衝區，移除已處理的數據
       // _buffer = _buffer.substring(end + 1);

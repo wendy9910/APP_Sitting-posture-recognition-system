@@ -52,11 +52,7 @@ class BackgroundCollectedPage extends StatelessWidget {
         argumentsLabelsTimestamps.map((timestamp) {
       return LabelEntry(
           (timestamp.millisecondsSinceEpoch - argumentsShift).toDouble(),
-          ((timestamp.hour <= 9 ? '0' : '') +
-              timestamp.hour.toString() +
-              ':' +
-              (timestamp.minute <= 9 ? '0' : '') +
-              timestamp.minute.toString()));
+          ('${timestamp.hour <= 9 ? '0' : ''}${timestamp.hour}:${timestamp.minute <= 9 ? '0' : ''}${timestamp.minute}'));
     });
 
     return Scaffold(
@@ -67,7 +63,7 @@ class BackgroundCollectedPage extends StatelessWidget {
             (task.inProgress
                 ? FittedBox(
                     child: Container(
-                        margin: new EdgeInsets.all(16.0),
+                        margin: EdgeInsets.all(16.0),
                         child: CircularProgressIndicator(
                             valueColor:
                                 AlwaysStoppedAnimation<Color>(Colors.white))))
