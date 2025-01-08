@@ -171,7 +171,8 @@ class UpperCalibrationPage extends StatefulWidget {
 
 class _UpperCalibrationPageState extends State<UpperCalibrationPage> {
   bool isCalibrating = false; // 是否開始校正
-  bool isCalibrating0 = false; // 是否開始校正
+  bool isCalibrating_show = false; // 是否開始校正(顯示校正狀態icon用)
+  bool isCalibrating_button = false; // 是否開始校正(顯示校正狀態icon用)
 
   @override
   void initState() {
@@ -179,7 +180,7 @@ class _UpperCalibrationPageState extends State<UpperCalibrationPage> {
 
     // 初始化校正狀態
     isCalibrating = false;
-    isCalibrating0 = false;
+    isCalibrating_show = false;
   }
 
   void toggleCalibration(BuildContext context) {
@@ -189,14 +190,13 @@ class _UpperCalibrationPageState extends State<UpperCalibrationPage> {
     if (!isCalibrating) {
       bluetoothProvider.sendMessage("2"); // Start calibration
       bluetoothProvider.setDataType("2");
-      isCalibrating = true;
+      isCalibrating_button = true;
+      isCalibrating_show = false;
     } else {
       bluetoothProvider.sendMessage("3"); // Stop calibration
       bluetoothProvider.setDataType("3");
-      isCalibrating = false;
+      isCalibrating_button = false;
     }
-
-    setState(() {}); // Trigger a rebuild to update the UI
   }
 
   @override
@@ -225,8 +225,9 @@ class _UpperCalibrationPageState extends State<UpperCalibrationPage> {
 
     if (result > 0.7) {
       print("Correct!!");
-      isCalibrating = true;
-      isCalibrating0 = true;
+      isCalibrating = false;
+      isCalibrating_show = true;
+      isCalibrating_button = false;
       bluetoothProvider.sendMessage("3");
       bluetoothProvider.setDataType("3");
     }
@@ -265,7 +266,7 @@ class _UpperCalibrationPageState extends State<UpperCalibrationPage> {
               ),
             ),
             SizedBox(height: 20),
-            isCalibrating0
+            isCalibrating_show
                 ? Icon(Icons.check, size: 50, color: Colors.green)
                 : CircularProgressIndicator(),
             SizedBox(height: 50),
@@ -325,8 +326,9 @@ class _UpperCalibrationPageState extends State<UpperCalibrationPage> {
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
-              child: Text(
-                  isCalibrating ? 'Stop Calibration' : 'Start Calibration'),
+              child: Text(isCalibrating_button
+                  ? 'Stop Calibration'
+                  : 'Start Calibration'),
             ),
           ],
         ),
@@ -342,7 +344,8 @@ class LowerCalibrationPage extends StatefulWidget {
 
 class _LowerCalibrationPage extends State<LowerCalibrationPage> {
   bool isCalibrating = false;
-  bool isCalibrating0 = false;
+  bool isCalibrating_show = false;
+  bool isCalibrating_button = false;
 
   @override
   void initState() {
@@ -350,7 +353,7 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
 
     // 初始化校正狀態
     isCalibrating = false;
-    isCalibrating0 = false;
+    isCalibrating_show = false;
   }
 
   void toggleCalibration(BuildContext context) {
@@ -360,13 +363,13 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
     if (!isCalibrating) {
       bluetoothProvider.sendMessage("4"); // Start calibration
       bluetoothProvider.setDataType("4");
-      isCalibrating = true;
+      isCalibrating_button = true;
+      isCalibrating_show = false;
     } else {
       bluetoothProvider.sendMessage("5"); // Stop calibration
       bluetoothProvider.setDataType("5");
-      isCalibrating = false;
+      isCalibrating_button = false;
     }
-    setState(() {});
   }
 
   @override
@@ -393,8 +396,9 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
 
     if (result > 0.8) {
       print("Correct!!");
-      isCalibrating = true;
-      isCalibrating0 = true;
+      isCalibrating = false;
+      isCalibrating_show = true;
+      isCalibrating_button = false;
       bluetoothProvider.sendMessage("5");
       bluetoothProvider.setDataType("5");
     }
@@ -431,7 +435,7 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
               ),
             ),
             SizedBox(height: 20),
-            isCalibrating0
+            isCalibrating_show
                 ? Icon(Icons.check, size: 50, color: Colors.green)
                 : CircularProgressIndicator(),
             SizedBox(height: 50),
@@ -492,8 +496,9 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
-              child: Text(
-                  isCalibrating ? 'Stop Calibration' : 'Start Calibration'),
+              child: Text(isCalibrating_button
+                  ? 'Stop Calibration'
+                  : 'Start Calibration'),
             ),
           ],
         ),
