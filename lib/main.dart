@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart'; // Flutter的Material Design包
-import 'package:provider/provider.dart'; // 狀態管理套件
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'page/MainPage.dart';
 import '/bluetoothPage/BluetoothConnectionProvider.dart';
 

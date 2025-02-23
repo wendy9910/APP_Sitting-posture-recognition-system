@@ -170,33 +170,32 @@ class UpperCalibrationPage extends StatefulWidget {
 }
 
 class _UpperCalibrationPageState extends State<UpperCalibrationPage> {
-  bool isCalibrating = false; // 是否開始校正
   bool isCalibrating_show = false; // 是否開始校正(顯示校正狀態icon用)
-  bool isCalibrating_button = false; // 是否開始校正(顯示校正狀態icon用)
 
   @override
   void initState() {
     super.initState();
 
     // 初始化校正狀態
-    isCalibrating = false;
     isCalibrating_show = false;
   }
 
-  void toggleCalibration(BuildContext context) {
+  // 開始校正函式
+  void startCalibration(BuildContext context) {
+    final bluetoothProvider =
+        Provider.of<BluetoothConnectionProvider>(context, listen: false);
+    isCalibrating_show = false;
+    bluetoothProvider.sendMessage("2"); // Start calibration
+    bluetoothProvider.setDataType("2");
+  }
+
+  // 停止校正函式
+  void stopCalibration(BuildContext context) {
     final bluetoothProvider =
         Provider.of<BluetoothConnectionProvider>(context, listen: false);
 
-    if (!isCalibrating) {
-      bluetoothProvider.sendMessage("2"); // Start calibration
-      bluetoothProvider.setDataType("2");
-      isCalibrating_button = true;
-      isCalibrating_show = false;
-    } else {
-      bluetoothProvider.sendMessage("3"); // Stop calibration
-      bluetoothProvider.setDataType("3");
-      isCalibrating_button = false;
-    }
+    bluetoothProvider.sendMessage("3"); // Start calibration
+    bluetoothProvider.setDataType("3");
   }
 
   @override
@@ -223,11 +222,10 @@ class _UpperCalibrationPageState extends State<UpperCalibrationPage> {
 
     print('重合率: $result');
 
-    if (result > 0.7) {
+    if (result > 0.60) {
       print("Correct!!");
-      isCalibrating = false;
       isCalibrating_show = true;
-      isCalibrating_button = false;
+
       bluetoothProvider.sendMessage("3");
       bluetoothProvider.setDataType("3");
     }
@@ -276,6 +274,7 @@ class _UpperCalibrationPageState extends State<UpperCalibrationPage> {
                   width: 320,
                   height: 240,
                   decoration: BoxDecoration(
+                    color: Color.fromARGB(255, 243, 244, 244),
                     border: Border.all(color: Colors.black, width: 2),
                   ),
                   child: Stack(
@@ -311,24 +310,29 @@ class _UpperCalibrationPageState extends State<UpperCalibrationPage> {
               ],
             ),
             SizedBox(height: 40),
-            ElevatedButton(
-              onPressed: () => toggleCalibration(context), // Toggle button text
-              style: ElevatedButton.styleFrom(
-                minimumSize: Size(200, 50),
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                textStyle: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Start Calibration 按鈕
+                IconButton(
+                  onPressed: () => startCalibration(context), // 若正在校正則禁用
+                  icon: const Icon(Icons.play_arrow), // 播放圖示
+                  iconSize: 40,
+                  color: Colors.green, // 綠色代表開始
+                  tooltip: 'Start Calibration', // 提示文字
                 ),
-                backgroundColor: const Color.fromARGB(255, 36, 64, 114), // 背景顏色
-                foregroundColor: Colors.white, // Text color
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+
+                const SizedBox(width: 20), // 增加按鈕間距
+
+                // Stop Calibration 按鈕
+                IconButton(
+                  onPressed: () => stopCalibration(context), // 若未校正則禁用
+                  icon: const Icon(Icons.stop), // 停止圖示
+                  iconSize: 40,
+                  color: Colors.red, // 紅色代表停止
+                  tooltip: 'Stop Calibration', // 提示文字
                 ),
-              ),
-              child: Text(isCalibrating_button
-                  ? 'Stop Calibration'
-                  : 'Start Calibration'),
+              ],
             ),
           ],
         ),
@@ -343,33 +347,32 @@ class LowerCalibrationPage extends StatefulWidget {
 }
 
 class _LowerCalibrationPage extends State<LowerCalibrationPage> {
-  bool isCalibrating = false;
   bool isCalibrating_show = false;
-  bool isCalibrating_button = false;
 
   @override
   void initState() {
     super.initState();
 
     // 初始化校正狀態
-    isCalibrating = false;
     isCalibrating_show = false;
   }
 
-  void toggleCalibration(BuildContext context) {
+  // 開始校正函式
+  void startCalibration(BuildContext context) {
+    final bluetoothProvider =
+        Provider.of<BluetoothConnectionProvider>(context, listen: false);
+    isCalibrating_show = false;
+    bluetoothProvider.sendMessage("4"); // Start calibration
+    bluetoothProvider.setDataType("4");
+  }
+
+  // 停止校正函式
+  void stopCalibration(BuildContext context) {
     final bluetoothProvider =
         Provider.of<BluetoothConnectionProvider>(context, listen: false);
 
-    if (!isCalibrating) {
-      bluetoothProvider.sendMessage("4"); // Start calibration
-      bluetoothProvider.setDataType("4");
-      isCalibrating_button = true;
-      isCalibrating_show = false;
-    } else {
-      bluetoothProvider.sendMessage("5"); // Stop calibration
-      bluetoothProvider.setDataType("5");
-      isCalibrating_button = false;
-    }
+    bluetoothProvider.sendMessage("5"); // Stop calibration
+    bluetoothProvider.setDataType("5");
   }
 
   @override
@@ -396,9 +399,8 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
 
     if (result > 0.8) {
       print("Correct!!");
-      isCalibrating = false;
+
       isCalibrating_show = true;
-      isCalibrating_button = false;
       bluetoothProvider.sendMessage("5");
       bluetoothProvider.setDataType("5");
     }
@@ -445,6 +447,7 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
                   width: 320,
                   height: 240,
                   decoration: BoxDecoration(
+                    color: Color.fromARGB(255, 243, 244, 244),
                     border: Border.all(color: Colors.black, width: 2),
                   ),
                   child: Stack(
@@ -480,25 +483,29 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
               ],
             ),
             SizedBox(height: 40),
-            ElevatedButton(
-              onPressed: () => toggleCalibration(context), // Toggle button text
-              style: ElevatedButton.styleFrom(
-                minimumSize: Size(200, 50),
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                textStyle: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Start Calibration 按鈕
+                IconButton(
+                  onPressed: () => startCalibration(context),
+                  icon: const Icon(Icons.play_arrow),
+                  iconSize: 40,
+                  color: Colors.green,
+                  tooltip: 'Start Calibration',
                 ),
-                backgroundColor:
-                    Color.fromARGB(255, 15, 49, 99), // Button color
-                foregroundColor: Colors.white, // Text color
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+
+                const SizedBox(width: 20),
+
+                // Stop Calibration 按鈕
+                IconButton(
+                  onPressed: () => stopCalibration(context),
+                  icon: const Icon(Icons.stop),
+                  iconSize: 40,
+                  color: Colors.red,
+                  tooltip: 'Stop Calibration',
                 ),
-              ),
-              child: Text(isCalibrating_button
-                  ? 'Stop Calibration'
-                  : 'Start Calibration'),
+              ],
             ),
           ],
         ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
-import 'package:provider/provider.dart'; // 狀態管理套件
+import 'package:provider/provider.dart';
 import 'analyticsPage.dart';
 import 'StartPage.dart';
 import 'SettingPage.dart';
@@ -17,6 +17,13 @@ class MainPage extends StatefulWidget {
 
 class _MainPage extends State<MainPage> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showGuideSheet();
+    });
+  }
+
   Widget build(BuildContext context) {
     // ChangeNotifierProvider是provider套件中的一個widget，用於將狀態向下傳遞給子widget
     return ChangeNotifierProvider(
@@ -29,8 +36,82 @@ class _MainPage extends State<MainPage> {
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
         ),
-        home: MyHomePage(), // 首頁的widget
-        // navigatorObservers: [BluetoothConnectionProvider()],
+        home: MyHomePage(),
+      ),
+    );
+  }
+
+  void _showGuideSheet() {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)), // 圓角
+      ),
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.all(20),
+          height: 300,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Text(
+                  "Let’s Get You Started!",
+                  style: TextStyle(
+                    fontSize: 20, // 放大字體
+                    fontWeight: FontWeight.bold, // 加粗
+                    color: const Color.fromARGB(255, 0, 86, 179), // 更顯眼
+                  ),
+                ),
+              ),
+              SizedBox(height: 10),
+              Divider(thickness: 1), // 添加分隔線
+              SizedBox(height: 10),
+              _buildStep(Icons.bluetooth, "Connect Bluetooth to Toybrick"),
+              _buildStep(Icons.settings, "Start device calibration"),
+              _buildStep(
+                  Icons.task, "Start the sitting posture recognition task"),
+              Spacer(),
+              Center(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text("Confirm",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: const Color.fromARGB(255, 36, 64, 114),
+                      )),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildStep(IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.blue, size: 24),
+          SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -204,25 +285,23 @@ class GeneratorPage extends StatelessWidget {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(200, 50), // 設置按鈕尺寸
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16), // 調整內邊距
-                    backgroundColor:
-                        const Color.fromARGB(255, 36, 64, 114), // 背景顏色
-                    foregroundColor: Colors.white, // 文字顏色
+                    minimumSize: const Size(200, 50),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    backgroundColor: const Color.fromARGB(255, 36, 64, 114),
+                    foregroundColor: Colors.white,
                     shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero, // 設置直角樣式
+                      borderRadius: BorderRadius.zero,
                     ),
-                    elevation: 4, // 增加輕微陰影，提升層次感
+                    elevation: 4,
                     shadowColor: Colors.black.withOpacity(0.2), // 陰影顏色
                   ),
                   child: const Text(
                     'Calibration Task',
                     style: TextStyle(
-                      fontSize: 24, // 文字大小
-                      fontWeight: FontWeight.w600, // 字體加粗
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
                       fontFamily: 'DengXian',
-                      color: Color.fromARGB(255, 245, 247, 250), // 文字顏色
+                      color: Color.fromARGB(255, 245, 247, 250),
                     ),
                   ),
                 ),
@@ -240,19 +319,19 @@ class BTButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: Alignment.topRight, // 對齊右上角
+      alignment: Alignment.topRight,
       child: Padding(
-        padding: const EdgeInsets.only(top: 10.0, right: 12.0), // 設定邊距
+        padding: const EdgeInsets.only(top: 10.0, right: 12.0),
         child: Container(
-          width: 30, // 按鈕寬度
-          height: 50, // 按鈕高度
+          width: 30,
+          height: 50,
           decoration: BoxDecoration(
             shape: BoxShape.rectangle,
-            borderRadius: BorderRadius.circular(15), // 圓角設計
-            color: Color.fromARGB(255, 36, 64, 114), // 背景顏色
+            borderRadius: BorderRadius.circular(15),
+            color: Color.fromARGB(255, 36, 64, 114),
           ),
           child: InkWell(
-            borderRadius: BorderRadius.circular(15), // 確保 InkWell 匹配邊角
+            borderRadius: BorderRadius.circular(15),
             onTap: () async {
               final BluetoothDevice? selectedDevice =
                   await Navigator.of(context).push(
@@ -266,13 +345,10 @@ class BTButton extends StatelessWidget {
               if (selectedDevice != null) {
                 print('Connect -> selected ${selectedDevice.address}');
 
-                // 获取 BluetoothConnectionProvider 并使用它来连接设备
                 final bluetoothProvider =
                     Provider.of<BluetoothConnectionProvider>(context,
                         listen: false);
                 await bluetoothProvider.connectToDevice(selectedDevice);
-
-                // 连接成功后，可以在应用程序的其他页面使用 bluetoothProvider.connection 访问连接
               } else {
                 print('Connect -> no device selected');
               }

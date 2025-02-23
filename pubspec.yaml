@@ -27,6 +27,7 @@ dependencies:
   fluttertoast: ^8.2.8
   animated_text_kit: ^4.2.2
   soundpool: ^2.4.1
+  crypto: ^3.0.6
   # flutter_ringtone_player: ^3.0.0
 
 

@@ -3,6 +3,7 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'dart:typed_data';
 import '../database/task_db.dart';
 import '../global.dart' as globals;
+import 'package:fluttertoast/fluttertoast.dart';
 
 class BluetoothConnectionProvider with ChangeNotifier {
   BluetoothConnection? _connection;
@@ -47,6 +48,7 @@ class BluetoothConnectionProvider with ChangeNotifier {
       });
       notifyListeners();
       print('Connected to ${device.name}');
+      await showAlert(device);
     } catch (e) {
       print('Error connecting to device: $e');
       _connection = null;
@@ -58,9 +60,10 @@ class BluetoothConnectionProvider with ChangeNotifier {
   void _onDataReceived(Uint8List data) {
     _buffer += String.fromCharCodes(data);
 
-    // print("Current buffer: $_buffer");
+    print("Current buffer: $_buffer");
 
     if (_dataType == '0') {
+      print("IN");
       _processPoseData();
     } else if (_dataType == '2' || _dataType == '4') {
       print("IN");
@@ -69,42 +72,41 @@ class BluetoothConnectionProvider with ChangeNotifier {
   }
 
   void _processPoseData() async {
-    // 檢查緩衝區中是否有完整的數據集
-    int start = _buffer.indexOf('/');
-    int end = _buffer.indexOf('*');
+    while (true) {
+      int start = _buffer.indexOf('/');
+      int end = _buffer.indexOf('*');
 
-    // 確保開始和結束標記都存在，且結束標記在開始標記之後
-    while (start != -1 && end != -1 && end > start) {
-      // 提取數據
+      //當沒有完整的 `/` 和 `*`，直接退出等待更多數據
+      if (start == -1 || end == -1 || end <= start) {
+        return; // 等待更多數據
+      }
+
+      // 提取完整數據
       String dataChunk = _buffer.substring(start + 1, end);
       List<String> parts = dataChunk.split(',');
 
+      // 確保數據格式正確
       if (parts.length == 2) {
         _receivedUpperBodyData = parts[0];
         _receivedLowerBodyData = parts[1];
 
-        print('上半身資料: $_receivedUpperBodyData');
-        print('下半身資料: $_receivedLowerBodyData');
+        print('上半身: $_receivedUpperBodyData');
+        print('下半身: $_receivedLowerBodyData');
 
         notifyListeners();
-      }
 
-      // 儲存到資料庫
-      await dbInstance.updatePostureStat(globals.currentTaskId!,
-          _receivedUpperBodyData, _receivedLowerBodyData);
-
-      // 更新緩衝區，移除已處理的數據
-      // _buffer = _buffer.substring(end + 1);
-
-      if (end + 1 < _buffer.length) {
-        _buffer = _buffer.substring(end + 1);
+        // 儲存到資料庫
+        await dbInstance.updatePostureStat(globals.currentTaskId!,
+            _receivedUpperBodyData, _receivedLowerBodyData);
       } else {
-        _buffer = ""; // 如果字符串末尾已達到，重置緩衝區
+        print("數據格式錯誤，丟棄！");
       }
 
-      // 重新尋找下一組數據的標記
-      start = _buffer.indexOf('/');
-      end = _buffer.indexOf('*');
+      // **正確移除已處理的部分**
+      _buffer = _buffer.substring(end + 1);
+
+      // **如果 _buffer 變空，結束 while 迴圈**
+      if (_buffer.isEmpty) break;
     }
   }
 
@@ -148,6 +150,27 @@ class BluetoothConnectionProvider with ChangeNotifier {
   // 結束任務時，重置狀態
   Future<void> endTask() async {
     notifyListeners(); // 通知聽眾更新
+  }
+
+  Future<void> showAlert(BluetoothDevice device) async {
+    if (globals.isDialogShowing) {
+      return;
+    }
+    globals.isDialogShowing = true;
+
+    Fluttertoast.showToast(
+      msg: 'Connected to ${device.name}',
+      toastLength: Toast.LENGTH_SHORT, // 可選：Toast.LENGTH_LONG
+      gravity: ToastGravity.TOP, // 可調整為 CENTER 或 BOTTOM
+      backgroundColor: const Color.fromARGB(255, 80, 145, 237), // 背景顏色
+      textColor: Colors.white, // 文字顏色
+      fontSize: 16.0, // 文字大小
+      timeInSecForIosWeb: 1, // iOS/Web 運行時間
+    );
+
+    Future.delayed(Duration(seconds: 1), () {
+      globals.isDialogShowing = false;
+    });
   }
 
   void sendMessage(String message) {

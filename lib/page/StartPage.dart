@@ -384,6 +384,7 @@ class PostureDetector {
 
   bool isUpperBodyPostureIncorrect(UpperBodyAction action) {
     const incorrectPostures = {
+      UpperBodyAction.BackRest,
       UpperBodyAction.BackHunchedForward,
       UpperBodyAction.BackSlouchingLeft,
       UpperBodyAction.BackSlouchingRight,
