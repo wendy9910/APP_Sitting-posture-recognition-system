@@ -222,12 +222,13 @@ class _UpperCalibrationPageState extends State<UpperCalibrationPage> {
 
     print('重合率: $result');
 
-    if (result > 0.60) {
+    if (result > 0.55) {
       print("Correct!!");
       isCalibrating_show = true;
 
       bluetoothProvider.sendMessage("3");
       bluetoothProvider.setDataType("3");
+      bluetoothProvider.endTask();
     }
 
     //畫面用途
@@ -373,6 +374,7 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
 
     bluetoothProvider.sendMessage("5"); // Stop calibration
     bluetoothProvider.setDataType("5");
+    bluetoothProvider.endTask();
   }
 
   @override
@@ -397,7 +399,7 @@ class _LowerCalibrationPage extends State<LowerCalibrationPage> {
     double result = calculateIoU(rectA, rectB);
     print('重合率: $result');
 
-    if (result > 0.8) {
+    if (result > 0.75) {
       print("Correct!!");
 
       isCalibrating_show = true;

@@ -4,6 +4,9 @@ import 'dart:typed_data';
 import '../database/task_db.dart';
 import '../global.dart' as globals;
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:crypto/crypto.dart';
+import 'dart:convert';
+import 'dart:async';
 
 class BluetoothConnectionProvider with ChangeNotifier {
   BluetoothConnection? _connection;
@@ -30,6 +33,8 @@ class BluetoothConnectionProvider with ChangeNotifier {
   String get received_y2 => _received_y2;
 
   BluetoothConnection? get connection => _connection;
+
+  Timer? bufferResetTimer;
 
   // Database instance
   var dbInstance = TaskDB.instance;
@@ -71,84 +76,191 @@ class BluetoothConnectionProvider with ChangeNotifier {
     }
   }
 
+  String generateSHA256(String input) {
+    return sha256.convert(utf8.encode(input)).toString();
+  }
+
+  void resetBufferIfStuck() {
+    if (bufferResetTimer != null) {
+      bufferResetTimer!.cancel();
+    }
+
+    bufferResetTimer = Timer(Duration(seconds: 3), () {
+      if (_buffer.isNotEmpty) {
+        print("`_buffer` 長時間未變化，強制清除！");
+        _buffer = "";
+      }
+    });
+  }
+
   void _processPoseData() async {
-    while (true) {
-      int start = _buffer.indexOf('/');
-      int end = _buffer.indexOf('*');
+    try {
+      while (true) {
+        int start = _buffer.indexOf('[');
+        int end = _buffer.lastIndexOf(']'); // 改用 `lastIndexOf()` 確保取到最後一個 `]`
 
-      //當沒有完整的 `/` 和 `*`，直接退出等待更多數據
-      if (start == -1 || end == -1 || end <= start) {
-        return; // 等待更多數據
+        // 當沒有完整的 `[` 和 `]`，直接退出等待更多數據
+        if (start == -1 || end == -1 || end <= start) {
+          return; // 等待更多數據
+        }
+
+        // 檢查 `_buffer` 長度是否異常，防止卡住
+        if (_buffer.length > 1024) {
+          print("`_buffer` 過大，強制清除舊數據！");
+          _buffer = "";
+          return;
+        }
+
+        // **提取完整數據**
+        String fullSegment = _buffer.substring(start + 1, end);
+
+        // **檢查是否包含 SHA-256 校驗碼**
+        List<String> segmentParts = fullSegment.split('|');
+        if (segmentParts.length != 2) {
+          print("SHA-256 格式錯誤，請求重發！");
+          _buffer = _buffer.substring(end + 1);
+          continue;
+        }
+
+        String dataChunk = segmentParts[0].trim(); // 主要座標數據
+        String receivedChecksum = segmentParts[1].trim(); // SHA-256 校驗碼
+
+        // 確保 SHA-256 長度正確
+        if (receivedChecksum.length != 64) {
+          print("SHA-256 長度錯誤，請求重發！");
+          _buffer = _buffer.substring(end + 1);
+          continue;
+        }
+
+        // 驗證 SHA-256
+        if (generateSHA256(dataChunk) == receivedChecksum) {
+          print("SHA-256 校驗成功，解析數據: $dataChunk");
+
+          // **去掉 `*` 和 `/` 再分割數據**
+          String cleanData = dataChunk.replaceAll('*', '').trim();
+          cleanData = cleanData.replaceAll('/', '').trim();
+          List<String> parts = cleanData.split(',');
+
+          if (parts.length == 2) {
+            _receivedUpperBodyData = parts[0].trim();
+            _receivedLowerBodyData = parts[1].trim();
+
+            print('上半身: $_receivedUpperBodyData');
+            print('下半身: $_receivedLowerBodyData');
+            notifyListeners();
+
+            //  儲存到資料庫
+            await dbInstance.updatePostureStat(globals.currentTaskId!,
+                _receivedUpperBodyData, _receivedLowerBodyData);
+
+            // 成功解析後，防止 `_buffer` 長時間卡住
+            resetBufferIfStuck();
+          } else {
+            print("數據格式錯誤，請求重發！");
+          }
+        } else {
+          print(" SHA-256 驗證失敗，請求重發！");
+        }
+
+        // 清理已處理的 `_buffer`
+        _buffer = _buffer.substring(end + 1);
+
+        // 如果 `_buffer` 變空，結束 while 迴圈
+        if (_buffer.isEmpty) break;
       }
-
-      // 提取完整數據
-      String dataChunk = _buffer.substring(start + 1, end);
-      List<String> parts = dataChunk.split(',');
-
-      // 確保數據格式正確
-      if (parts.length == 2) {
-        _receivedUpperBodyData = parts[0];
-        _receivedLowerBodyData = parts[1];
-
-        print('上半身: $_receivedUpperBodyData');
-        print('下半身: $_receivedLowerBodyData');
-
-        notifyListeners();
-
-        // 儲存到資料庫
-        await dbInstance.updatePostureStat(globals.currentTaskId!,
-            _receivedUpperBodyData, _receivedLowerBodyData);
-      } else {
-        print("數據格式錯誤，丟棄！");
-      }
-
-      // **正確移除已處理的部分**
-      _buffer = _buffer.substring(end + 1);
-
-      // **如果 _buffer 變空，結束 while 迴圈**
-      if (_buffer.isEmpty) break;
+    } catch (e) {
+      print("錯誤發生: $e");
+      _buffer = ""; //  避免 `_buffer` 出錯後卡住
     }
   }
 
-  void _processCoordinateData() {
-    // 檢查緩衝區中是否有完整的數據集
-    int start = _buffer.indexOf('/');
-    int end = _buffer.indexOf('*');
+  void _processCoordinateData() async {
+    try {
+      while (true) {
+        int start = _buffer.indexOf('[');
+        int end = _buffer.lastIndexOf(']'); // 改用 `lastIndexOf()` 確保取到最後一個 `]`
 
-    // 確保開始和結束標記都存在，且結束標記在開始標記之後
-    while (start != -1 && end != -1 && end > start) {
-      // 提取數據
-      String dataChunk = _buffer.substring(start + 1, end);
-      List<String> parts = dataChunk.split(',');
+        // 當沒有完整的 `[` 和 `]`，直接退出等待更多數據
+        if (start == -1 || end == -1 || end <= start) {
+          return; // 等待更多數據
+        }
 
-      if (parts.length == 4) {
-        _received_x1 = parts[0];
-        _received_y1 = parts[1];
-        _received_x2 = parts[2];
-        _received_y2 = parts[3];
+        // 檢查 `_buffer` 長度是否異常，防止卡住
+        if (_buffer.length > 1024) {
+          print("`_buffer` 過大，強制清除舊數據！");
+          _buffer = "";
+          return;
+        }
 
-        print(
-            'Coordinates: ($_received_x1, $_received_y1), ($_received_x2, $_received_y2)');
-        notifyListeners();
+        // 提取完整數據
+        String fullSegment = _buffer.substring(start + 1, end);
+
+        // **檢查是否包含 SHA-256 校驗碼**
+        List<String> segmentParts = fullSegment.split('|');
+        if (segmentParts.length != 2) {
+          print("SHA-256 格式錯誤，請求重發！");
+          _buffer = _buffer.substring(end + 1);
+          continue;
+        }
+
+        String dataChunk = segmentParts[0].trim(); // 主要座標數據
+        String receivedChecksum = segmentParts[1].trim(); // SHA-256 校驗碼
+
+        // 確保 SHA-256 長度正確
+        if (receivedChecksum.length != 64) {
+          print("SHA-256 長度錯誤，請求重發！");
+          _buffer = _buffer.substring(end + 1);
+          continue;
+        }
+
+        // 驗證 SHA-256
+        if (generateSHA256(dataChunk) == receivedChecksum) {
+          print("SHA-256 校驗成功，解析數據: $dataChunk");
+
+          // 去掉 `*` 和 `/` 再分割座標
+          String cleanData = dataChunk.replaceAll('*', '').trim();
+          cleanData = cleanData.replaceAll('/', '').trim();
+          List<String> parts = cleanData.split(',');
+
+          if (parts.length == 4) {
+            _received_x1 = parts[0].trim();
+            _received_y1 = parts[1].trim();
+            _received_x2 = parts[2].trim();
+            _received_y2 = parts[3].trim();
+
+            print(
+                '座標資料: ($_received_x1, $_received_y1), ($_received_x2, $_received_y2)');
+            notifyListeners();
+          } else {
+            print("數據格式錯誤，請求重發！");
+          }
+
+          // ✅ **成功解析數據後，防止 `_buffer` 長時間卡住**
+          resetBufferIfStuck();
+        } else {
+          print("SHA-256 驗證失敗，請求重發！");
+        }
+
+        // **清理已處理的 `_buffer`**
+        _buffer = _buffer.substring(end + 1);
+
+        // **如果 `_buffer` 變空，結束 while 迴圈**
+        if (_buffer.isEmpty) break;
       }
-
-      // 更新緩衝區，移除已處理的數據
-      _buffer = _buffer.substring(end + 1);
-
-      // 重新尋找下一組數據的標記
-      start = _buffer.indexOf('/');
-      end = _buffer.indexOf('*');
+    } catch (e) {
+      print("錯誤發生: $e");
+      _buffer = ""; // 避免 `_buffer` 出錯後卡住
     }
   }
 
   Future<void> startNewTask() async {
-    // String startTime = DateTime.now().toString();
-    // globals.currentTaskId = await dbInstance.startNewTask(); // 開始新任務，並獲取新任務的ID
+    _buffer = '';
     notifyListeners(); // 通知聽眾更新
   }
 
   // 結束任務時，重置狀態
   Future<void> endTask() async {
+    _buffer = '';
     notifyListeners(); // 通知聽眾更新
   }
 
